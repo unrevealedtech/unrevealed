@@ -12,7 +12,7 @@ export function UnrevealedProvider({
 }: UnrevealedProviderProps) {
   const [features, setFeatures] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('https://edge.unrevealed.tech', {
@@ -22,12 +22,12 @@ export function UnrevealedProvider({
       .then((response) => response.json())
       .then((data) => {
         setFeatures(data.features);
-        setLoading(false);
       })
-      .catch((err) => {
-        console.log(err);
-
-        setError(err);
+      .catch((err: Error) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [clientKey]);
 

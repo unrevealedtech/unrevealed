@@ -3,7 +3,7 @@ import { createContext } from 'react';
 export interface UnrevealedContextValue {
   features: string[];
   loading: boolean;
-  error: null;
+  error: string | null;
 }
 
 export const UnrevealedContext = createContext<UnrevealedContextValue>({
