@@ -20,7 +20,7 @@
   "bugs": {
     "url": "https://github.com/unrevealedtech/react/issues"
   },
-  "homepage": "https://github.com/unrevealedtech/react#readme",
+  "homepage": "https://unrevealed.tech",
   "peerDependencies": {
     "react": ">= 16"
   },
