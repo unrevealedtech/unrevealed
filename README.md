@@ -38,13 +38,13 @@ function App() {
 import { useFeature } from '@unrevealed/react';
 
 function Component() {
-  const { isEnabled, loading } = useFeature('user-access');
+  const { enabled, loading } = useFeature('user-access');
 
   if (loading) {
     // sdk is loading features
   }
 
-  if (isEnabled) {
+  if (enabled) {
     // feature is enabled for the current user
   } else {
     // feature is disabled

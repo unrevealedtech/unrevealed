@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { UnrevealedContext } from './context';
 
 export interface UseFeatureResult {
-  isEnabled: boolean;
+  enabled: boolean;
   loading: boolean;
   error: string | null;
 }
@@ -11,7 +11,7 @@ export function useFeature(featureKey: string) {
   const { error, loading, features } = useContext(UnrevealedContext);
 
   return {
-    isEnabled: features.includes(featureKey),
+    enabled: features.includes(featureKey),
     loading,
     error,
   };
