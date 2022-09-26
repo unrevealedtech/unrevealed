@@ -21,6 +21,14 @@
     "url": "https://github.com/unrevealedtech/react/issues"
   },
   "homepage": "https://unrevealed.tech",
+  "keywords": [
+    "unrevealed",
+    "react",
+    "feature flag",
+    "feature toggle",
+    "feature switch",
+    "release"
+  ],
   "peerDependencies": {
     "react": ">= 16"
   },
