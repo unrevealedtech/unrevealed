@@ -27,7 +27,7 @@ export function useTrackUser(
       return;
     }
 
-    fetch('https://track.unrevealed.tech', {
+    fetch('https://track.unrevealed.tech/identify', {
       method: 'post',
       headers: { 'Client-Key': clientKey, 'Content-Type': 'application/json' },
       body,
