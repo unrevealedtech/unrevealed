@@ -1,35 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { UnrevealedContext } from './context';
+import { User } from './types';
+import { useFetchFeatureFlags } from './useFetchFeatureFlags';
+import { useTrackUser } from './useTrackUser';
 
 export interface UnrevealedProviderProps {
   clientKey: string;
   children: React.ReactNode;
+  user?: User | undefined | null;
+  wait?: boolean;
 }
 
 export function UnrevealedProvider({
   clientKey,
+  user,
   children,
+  wait,
 }: UnrevealedProviderProps) {
-  const [features, setFeatures] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('https://edge.unrevealed.tech', {
-      method: 'get',
-      headers: { 'Client-Key': clientKey },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setFeatures(data.features);
-      })
-      .catch((err: Error) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [clientKey]);
+  const { features, loading, error } = useFetchFeatureFlags(clientKey, user, {
+    wait: !!wait,
+  });
+  useTrackUser(clientKey, user, { wait: !!wait });
 
   return (
     <UnrevealedContext.Provider value={{ features, loading, error }}>
