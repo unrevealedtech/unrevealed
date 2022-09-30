@@ -76,7 +76,7 @@ import { UnrevealedProvider, FeatureToggler } from '@unrevealed/react';
 function App() {
   return (
     <UnrevealedProvider clientKey={yourClientKey}>
-      <FeatureToggler />
+      {process.env.NODE_ENV === 'development' && <FeatureToggler />}
       <MainApp />
     </UnrevealedProvider>
   );
