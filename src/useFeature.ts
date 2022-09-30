@@ -8,10 +8,10 @@ export interface UseFeatureResult {
 }
 
 export function useFeature(featureKey: string) {
-  const { error, loading, features } = useContext(UnrevealedContext);
+  const { error, loading, activeFeatures } = useContext(UnrevealedContext);
 
   return {
-    enabled: features.includes(featureKey),
+    enabled: activeFeatures.includes(featureKey),
     loading,
     error,
   };

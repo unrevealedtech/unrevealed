@@ -1,13 +1,19 @@
 import { createContext } from 'react';
 
 export interface UnrevealedContextValue {
-  features: string[];
+  allFeatures: string[];
+  activeFeatures: string[];
   loading: boolean;
   error: string | null;
+  filteredFeatures: string[];
+  setFilteredFeatures: (features: string[]) => void;
 }
 
 export const UnrevealedContext = createContext<UnrevealedContextValue>({
-  features: [],
+  allFeatures: [],
+  activeFeatures: [],
   loading: true,
   error: null,
+  filteredFeatures: [],
+  setFilteredFeatures: () => [],
 });

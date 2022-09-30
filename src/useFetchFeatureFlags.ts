@@ -4,9 +4,9 @@ import { User } from './types';
 export function useFetchFeatureFlags(
   clientKey: string,
   user: User | undefined | null,
+  setFeatures: (features: string[]) => void,
   { wait }: { wait: boolean },
 ) {
-  const [features, setFeatures] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,5 +31,5 @@ export function useFetchFeatureFlags(
       });
   }, [clientKey, user, wait]);
 
-  return { features, loading, error };
+  return { loading, error };
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { UnrevealedContext } from './context';
 import { User } from './types';
 import { useFetchFeatureFlags } from './useFetchFeatureFlags';
@@ -17,13 +17,35 @@ export function UnrevealedProvider({
   children,
   wait,
 }: UnrevealedProviderProps) {
-  const { features, loading, error } = useFetchFeatureFlags(clientKey, user, {
-    wait: !!wait,
-  });
+  const [features, setFeatures] = useState<string[]>([]);
+  const [filteredFeatures, setFilteredFeatures] = useState<string[]>([]);
+
+  const { loading, error } = useFetchFeatureFlags(
+    clientKey,
+    user,
+    setFeatures,
+    {
+      wait: !!wait,
+    },
+  );
   useTrackUser(clientKey, user, { wait: !!wait });
 
+  const activeFeatures =
+    filteredFeatures.length > 0
+      ? features.filter((feature) => !filteredFeatures.includes(feature))
+      : features;
+
   return (
-    <UnrevealedContext.Provider value={{ features, loading, error }}>
+    <UnrevealedContext.Provider
+      value={{
+        allFeatures: features,
+        activeFeatures,
+        loading,
+        error,
+        filteredFeatures,
+        setFilteredFeatures,
+      }}
+    >
       {children}
     </UnrevealedContext.Provider>
   );
