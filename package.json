@@ -5,7 +5,8 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "rollup -c rollup.config.js",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "lint": "pnpm eslint src/"
   },
   "files": [
     "src",
@@ -30,11 +31,15 @@
     "release"
   ],
   "peerDependencies": {
-    "react": ">= 16"
+    "react": ">= 16.8"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.5.0",
     "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "^8.24.0",
+    "eslint-plugin-react": "^7.31.8",
     "prettier": "^2.7.1",
     "react": "^18.2.0",
     "rollup": "^2.79.1",
