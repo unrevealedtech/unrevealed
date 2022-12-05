@@ -11,10 +11,15 @@ function serializeBody(body: Body): string | null {
   }
 }
 
+interface Options {
+  wait: boolean;
+  trackingUrl?: string | undefined;
+}
+
 export function useTrackUser(
   clientKey: string,
   user: User | undefined | null,
-  { wait }: { wait: boolean },
+  { wait, trackingUrl = 'https://track.unrevealed.tech/identify' }: Options,
 ) {
   useEffect(() => {
     if (wait || !user) {
@@ -27,7 +32,7 @@ export function useTrackUser(
       return;
     }
 
-    fetch('https://track.unrevealed.tech/identify', {
+    fetch(trackingUrl, {
       method: 'post',
       headers: { 'Client-Key': clientKey, 'Content-Type': 'application/json' },
       body,

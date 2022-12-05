@@ -11,12 +11,18 @@ export interface UnrevealedProviderProps {
   wait?: boolean;
 }
 
+interface AdditionalProps {
+  trackingUrl?: string | undefined;
+}
+
 export function UnrevealedProvider({
   clientKey,
   user,
   children,
   wait,
+  ...props
 }: UnrevealedProviderProps) {
+  const { trackingUrl } = props as AdditionalProps;
   const [features, setFeatures] = useState<string[]>([]);
   const [filteredFeatures, setFilteredFeatures] = useState<string[]>([]);
 
@@ -28,7 +34,7 @@ export function UnrevealedProvider({
       wait: !!wait,
     },
   );
-  useTrackUser(clientKey, user, { wait: !!wait });
+  useTrackUser(clientKey, user, { wait: !!wait, trackingUrl });
 
   const activeFeatures =
     filteredFeatures.length > 0
