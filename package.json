@@ -1,9 +1,11 @@
 {
   "name": "@unrevealed/react",
-  "version": "0.0.7-rc.1",
+  "version": "0.0.7",
   "description": "React SDK for Unrevealed",
   "main": "dist/main.js",
   "scripts": {
+    "publish-canary": "pnpm publish --tag canary",
+    "publish-latest": "pnpm publish --tag latest",
     "build": "rollup -c rollup.config.js",
     "prepare": "npm run build",
     "lint": "pnpm eslint src/"
