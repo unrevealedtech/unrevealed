@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { User } from './types';
+import { serializeBody } from './utils';
 
 export function useFetchFeatureFlags(
   clientKey: string,
@@ -16,8 +17,9 @@ export function useFetchFeatureFlags(
     }
 
     fetch('https://edge.unrevealed.tech', {
-      method: 'get',
+      method: 'post',
       headers: { 'Client-Key': clientKey },
+      body: serializeBody({ user }),
     })
       .then((response) => response.json())
       .then((data) => {

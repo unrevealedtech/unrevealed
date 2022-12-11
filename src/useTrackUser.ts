@@ -1,15 +1,6 @@
 import { useEffect } from 'react';
 import { User } from './types';
-
-type Body = { user: User };
-
-function serializeBody(body: Body): string | null {
-  try {
-    return JSON.stringify(body);
-  } catch {
-    return null;
-  }
-}
+import { serializeBody } from './utils';
 
 interface Options {
   wait: boolean;
