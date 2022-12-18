@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { User } from './types';
+import { Team, User } from './types';
 import { serializeBody } from './utils';
 
 interface Options {
@@ -10,6 +10,7 @@ interface Options {
 export function useTrackUser(
   clientKey: string,
   user: User | undefined | null,
+  team: Team | undefined | null,
   { wait, trackingUrl = 'https://track.unrevealed.tech/identify' }: Options,
 ) {
   useEffect(() => {
@@ -17,7 +18,7 @@ export function useTrackUser(
       return;
     }
 
-    const body = serializeBody({ user });
+    const body = serializeBody({ user, team });
 
     if (!body) {
       return;

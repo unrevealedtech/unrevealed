@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { User } from './types';
+import { Team, User } from './types';
 import { serializeBody } from './utils';
 
 export function useFetchFeatureFlags(
   clientKey: string,
   user: User | undefined | null,
+  team: Team | undefined | null,
   setFeatures: (features: string[]) => void,
   { wait }: { wait: boolean },
 ) {
@@ -19,7 +20,7 @@ export function useFetchFeatureFlags(
     fetch('https://edge.unrevealed.tech', {
       method: 'post',
       headers: { 'Client-Key': clientKey },
-      body: serializeBody({ user }),
+      body: serializeBody({ user, team }),
     })
       .then((response) => response.json())
       .then((data) => {

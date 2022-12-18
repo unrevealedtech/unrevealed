@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UnrevealedContext } from './context';
-import { User } from './types';
+import { Team, User } from './types';
 import { useFetchFeatureFlags } from './useFetchFeatureFlags';
 import { useTrackUser } from './useTrackUser';
 
@@ -8,6 +8,7 @@ export interface UnrevealedProviderProps {
   clientKey: string;
   children: React.ReactNode;
   user?: User | undefined | null;
+  team: Team | undefined | null;
   wait?: boolean;
 }
 
@@ -18,6 +19,7 @@ interface AdditionalProps {
 export function UnrevealedProvider({
   clientKey,
   user,
+  team,
   children,
   wait,
   ...props
@@ -29,12 +31,13 @@ export function UnrevealedProvider({
   const { loading, error } = useFetchFeatureFlags(
     clientKey,
     user,
+    team,
     setFeatures,
     {
       wait: !!wait,
     },
   );
-  useTrackUser(clientKey, user, { wait: !!wait, trackingUrl });
+  useTrackUser(clientKey, user, team, { wait: !!wait, trackingUrl });
 
   const activeFeatures =
     filteredFeatures.length > 0
