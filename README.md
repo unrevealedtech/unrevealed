@@ -30,6 +30,7 @@ function App() {
     <UnrevealedProvider
       clientKey={yourClientKey}
       user={userObject}
+      team={teamObject}
       wait={loading}
     >
       <MainApp />
@@ -38,11 +39,24 @@ function App() {
 }
 ```
 
-| Provider Prop | Type    | Note                                                                                                             | Default value |
-| ------------- | ------- | ---------------------------------------------------------------------------------------------------------------- | ------------- |
-| `clientKey`\* | string  | Generate the client key on Unrevealed                                                                            | N/A           |
-| `user`        | Object  | Optional user object if you have user targetting on your features. The object should have a unique `id` property | `undefined`   |
-| `wait`        | boolean | Set `wait` to `true` if you're still loading the user and want to avoid Unrevealed making 2 requests             | `false`       |
+**Props**
+
+| Provider Prop | Type    | Note                                                                                                 | Default value |
+| ------------- | ------- | ---------------------------------------------------------------------------------------------------- | ------------- |
+| `clientKey`\* | string  | Generate the client key on Unrevealed                                                                | N/A           |
+| `user`        | Object  | Optional user object                                                                                 | `undefined`   |
+| `team`        | Object  | Optional team object                                                                                 | `undefined`   |
+| `wait`        | boolean | Set `wait` to `true` if you're still loading the user and want to avoid Unrevealed making 2 requests | `false`       |
+
+**Reserved properties**
+
+The following properties of the `user` object have special meaning to Unrevealed:
+`id`: used to uniquely identify a user
+`email`, `name`, `firstName`, `lastName`: Unrevealed will make these properties searchable if they are valid strings
+
+The following properties of the `team` object have special meaning to Unrevealed:
+`id`: used to uniquely identify a team
+`name`: Unrevealed will make this property searchable if it's a valid string
 
 ### Checking if a feature is enabled
 
