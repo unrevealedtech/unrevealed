@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+
+import { TRACKING_URL } from './constants';
 import { UnrevealedContext } from './context';
 import { Team, User } from './types';
-import { useFetchFeatureFlags } from './useFetchFeatureFlags';
-import { useTrackUser } from './useTrackUser';
+import { useFetchFeatures } from './useFetchFeatures';
 
 export interface UnrevealedProviderProps {
   clientKey: string;
@@ -18,26 +19,19 @@ interface AdditionalProps {
 
 export function UnrevealedProvider({
   clientKey,
-  user,
-  team,
   children,
-  wait,
   ...props
 }: UnrevealedProviderProps) {
   const { trackingUrl } = props as AdditionalProps;
-  const [features, setFeatures] = useState<string[]>([]);
   const [filteredFeatures, setFilteredFeatures] = useState<string[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
 
-  const { loading, error } = useFetchFeatureFlags(
+  const { features, loading, error } = useFetchFeatures({
     clientKey,
     user,
     team,
-    setFeatures,
-    {
-      wait: !!wait,
-    },
-  );
-  useTrackUser(clientKey, user, team, { wait: !!wait, trackingUrl });
+  });
 
   const activeFeatures =
     filteredFeatures.length > 0
@@ -47,12 +41,16 @@ export function UnrevealedProvider({
   return (
     <UnrevealedContext.Provider
       value={{
+        clientKey,
         allFeatures: features,
         activeFeatures,
         loading,
         error,
         filteredFeatures,
         setFilteredFeatures,
+        trackingUrl: trackingUrl || TRACKING_URL,
+        setUser,
+        setTeam,
       }}
     >
       {children}
