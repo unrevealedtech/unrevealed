@@ -27,12 +27,7 @@ import { UnrevealedProvider } from '@unrevealed/react';
 
 function App() {
   return (
-    <UnrevealedProvider
-      clientKey={yourClientKey}
-      user={userObject}
-      team={teamObject}
-      wait={loading}
-    >
+    <UnrevealedProvider clientKey={yourClientKey}>
       <MainApp />
     </UnrevealedProvider>
   );
@@ -41,21 +36,51 @@ function App() {
 
 **Props**
 
-| Provider Prop | Type    | Note                                                                                                 | Default value |
-| ------------- | ------- | ---------------------------------------------------------------------------------------------------- | ------------- |
-| `clientKey`\* | string  | Generate the client key on Unrevealed                                                                | N/A           |
-| `user`        | Object  | Optional user object                                                                                 | `undefined`   |
-| `team`        | Object  | Optional team object                                                                                 | `undefined`   |
-| `wait`        | boolean | Set `wait` to `true` if you're still loading the user and want to avoid Unrevealed making 2 requests | `false`       |
+| Provider Prop | Type   | Note                                  | Default value |
+| ------------- | ------ | ------------------------------------- | ------------- |
+| `clientKey`\* | string | Generate the client key on Unrevealed | N/A           |
 
-**Reserved properties**
+### Identify
 
-The following properties of the `user` object have special meaning to Unrevealed:
-`id`: used to uniquely identify a user
+You can use `identify` to set the current user and team. You'll want to call it whenever the current user or the current team changes
+
+```tsx
+import { useIdentify } from '@unrevealed/react';
+
+function Login() {
+  const { identify } = useIdentify();
+  // ...
+
+  const login = () => {
+    // ...
+    identify({
+      user: {
+        id: user.id,
+        traits: {
+          email: user.email,
+          name: user.name,
+          // ...
+        },
+      },
+      team: {
+        id: team.id,
+        traits: {
+          name: team.name,
+          plan: team.plan,
+          // ...
+        },
+      },
+    });
+  };
+}
+```
+
+**Reserved traits**
+
+The following traits of the `user` object have special meaning to Unrevealed:
 `email`, `name`, `firstName`, `lastName`: Unrevealed will make these properties searchable if they are valid strings
 
-The following properties of the `team` object have special meaning to Unrevealed:
-`id`: used to uniquely identify a team
+The following traits of the `team` object have special meaning to Unrevealed:
 `name`: Unrevealed will make this property searchable if it's a valid string
 
 ### Checking if a feature is enabled
