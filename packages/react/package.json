@@ -1,0 +1,51 @@
+{
+  "name": "@unrevealed/react",
+  "version": "0.0.10",
+  "description": "React SDK for Unrevealed",
+  "main": "dist/main.js",
+  "scripts": {
+    "publish-canary": "pnpm publish --tag canary",
+    "publish-latest": "pnpm publish --tag latest",
+    "build": "rollup -c rollup.config.js",
+    "prepare": "npm run build",
+    "lint": "pnpm eslint src/"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unrevealedtech/react.git"
+  },
+  "author": "Thomas Groutars",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/unrevealedtech/react/issues"
+  },
+  "homepage": "https://unrevealed.tech",
+  "keywords": [
+    "unrevealed",
+    "react",
+    "feature flag",
+    "feature toggle",
+    "feature switch",
+    "release"
+  ],
+  "peerDependencies": {
+    "react": ">= 16.8"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.5.0",
+    "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "^8.24.0",
+    "eslint-plugin-react": "^7.31.8",
+    "prettier": "^2.7.1",
+    "react": "^18.2.0",
+    "rollup": "^2.79.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.8.3"
+  }
+}
