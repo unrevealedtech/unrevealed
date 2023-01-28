@@ -1,0 +1,10 @@
+{
+  "name": "@unrevealed/cli",
+  "version": "0.0.0",
+  "description": "Unrevealed",
+  "main": "build/index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "Unrevealed",
+  "license": "MIT"
+}
