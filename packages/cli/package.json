@@ -2,9 +2,31 @@
   "name": "@unrevealed/cli",
   "version": "0.0.0",
   "description": "Unrevealed",
-  "main": "build/index.js",
-  "scripts": {},
+  "scripts": {
+    "build": "tsup"
+  },
   "keywords": [],
   "author": "Unrevealed",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "appdirsjs": "^1.2.7",
+    "commander": "^10.0.0",
+    "fs-extra": "^11.1.0",
+    "open": "^8.4.0",
+    "ora": "5.4.1"
+  },
+  "directories": {
+    "bin": "./bin"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/node": "^18.11.18",
+    "prettier": "^2.7.1",
+    "tslib": "^2.4.0",
+    "tsup": "^6.5.0",
+    "typescript": "^4.9.4"
+  },
+  "files": [
+    "dist"
+  ]
 }
