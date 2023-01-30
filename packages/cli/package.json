@@ -3,6 +3,8 @@
   "version": "0.0.0-rc.1",
   "description": "Unrevealed",
   "scripts": {
+    "publish-canary": "pnpm publish --tag canary",
+    "publish-latest": "pnpm publish --tag latest",
     "build": "tsup"
   },
   "keywords": [],
