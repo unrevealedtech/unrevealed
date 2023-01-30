@@ -67,7 +67,7 @@ export async function link() {
       },
     ]);
 
-    await writeConfig(productId);
+    await writeConfig({ productId });
   } catch (err) {
     if (err instanceof ClientError) {
       if (
