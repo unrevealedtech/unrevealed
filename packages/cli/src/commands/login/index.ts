@@ -1,11 +1,9 @@
-import appDirs from 'appdirsjs';
-import fs from 'fs-extra';
 import http from 'http';
 import { Socket } from 'net';
 import open from 'open';
 import ora from 'ora';
-import path from 'path';
 import url from 'url';
+import { writeToken } from '~/utils/auth';
 
 const PORT = 9789;
 const HOST = 'http://127.0.0.1';
@@ -16,17 +14,10 @@ const AUTH_URL = `${BASE_APP_URL}/cli/auth/token?redirect_uri=${encodeURICompone
 )}`;
 const SUCCESS_URL = `${BASE_APP_URL}/cli/auth/success`;
 
-const dataDir = appDirs({ appName: 'unrevealed' }).data;
-
 export async function login() {
   const token = await getToken();
 
-  await fs.ensureDir(dataDir);
-
-  await fs.writeFile(
-    path.join(dataDir, 'config.json'),
-    JSON.stringify({ token }, null, 2),
-  );
+  await writeToken(token);
 
   console.log('>>> Successfully logged in!');
 }

@@ -1,6 +1,6 @@
 {
   "name": "@unrevealed/cli",
-  "version": "0.0.0",
+  "version": "0.0.0-rc.1",
   "description": "Unrevealed",
   "scripts": {
     "build": "tsup"
@@ -10,16 +10,22 @@
   "license": "MIT",
   "dependencies": {
     "appdirsjs": "^1.2.7",
+    "chalk": "^5.2.0",
     "commander": "^10.0.0",
+    "execa": "^6.1.0",
     "fs-extra": "^11.1.0",
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.1.0",
+    "inquirer": "^9.1.4",
     "open": "^8.4.0",
-    "ora": "5.4.1"
+    "ora": "^6.1.2"
   },
   "directories": {
     "bin": "./bin"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.1",
+    "@types/inquirer": "^9.0.3",
     "@types/node": "^18.11.18",
     "prettier": "^2.7.1",
     "tslib": "^2.4.0",
