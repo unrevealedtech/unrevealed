@@ -100,7 +100,7 @@ export async function generate() {
       const { features, loading, error } = useUnrevealed();
       
       return {
-        enabled: features.has(featureKey),
+        enabled: features.has(key),
         loading,
         error,
       };
