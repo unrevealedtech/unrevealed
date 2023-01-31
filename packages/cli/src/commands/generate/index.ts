@@ -93,11 +93,59 @@ export async function generate() {
     isExported: true,
   });
 
-  const typedHookDeclaration = source.addFunction({
+  source.addTypeAlias({
+    name: 'UserTraits',
+    type: Writers.objectType({
+      properties: [],
+    }),
+    isExported: true,
+  });
+  source.addTypeAlias({
+    name: 'User',
+    type: Writers.objectType({
+      properties: [
+        {
+          name: 'id',
+          type: 'string',
+        },
+        {
+          name: 'traits',
+          type: 'UserTraits',
+        },
+      ],
+    }),
+    isExported: true,
+  });
+
+  source.addTypeAlias({
+    name: 'TeamTraits',
+    type: Writers.objectType({
+      properties: [],
+    }),
+    isExported: true,
+  });
+  source.addTypeAlias({
+    name: 'Team',
+    type: Writers.objectType({
+      properties: [
+        {
+          name: 'id',
+          type: 'string',
+        },
+        {
+          name: 'traits',
+          type: 'TeamTraits',
+        },
+      ],
+    }),
+    isExported: true,
+  });
+
+  const useFeatureDeclaration = source.addFunction({
     name: 'useFeature',
     isExported: true,
     statements: `const { features, loading, error } = useUnrevealed();
-      
+
       return {
         enabled: features.has(key),
         loading,
@@ -105,9 +153,20 @@ export async function generate() {
       };`,
   });
 
-  typedHookDeclaration.addParameter({
+  useFeatureDeclaration.addParameter({
     name: 'key',
     type: 'FeatureKey',
+  });
+
+  source.addFunction({
+    name: 'useIdentify',
+    isExported: true,
+    statements: `const { identify: unsafeIdentify } = useUnrevealed();
+      const identify = ({ user, team }: { user: User | null; team?: Team | null }) => {
+        unsafeIdentify({ user, team })
+      };
+
+      return { identify };`,
   });
 
   features.forEach((feature) => {
