@@ -68,6 +68,8 @@ export async function link() {
     ]);
 
     await writeConfig({ productId });
+
+    console.log(chalk.green('>>> Created unrevealed.config.json'));
   } catch (err) {
     if (err instanceof ClientError) {
       if (
@@ -97,8 +99,6 @@ function logError(...texts: string[]) {
 async function writeConfig({ productId }: { productId: string }) {
   const { stdout: projectDir } = await execa('npm', ['prefix']);
 
-  const configDir = path.join(projectDir, './.unrev');
-  const configFile = path.join(configDir, 'config.json');
-  await fs.ensureDir(configDir);
+  const configFile = path.join(projectDir, 'unrevealed.config.json');
   await fs.writeJSON(configFile, { productId }, { spaces: 2 });
 }
