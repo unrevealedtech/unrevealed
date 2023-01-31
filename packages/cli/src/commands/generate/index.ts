@@ -6,8 +6,9 @@ import { IndentationText, Project, WriterFunction, Writers } from 'ts-morph';
 import { readToken } from '~/auth';
 import { API_URL } from '~/constants';
 import { logError, logUnauthorized } from '~/logger';
+import { DataType, DATA_TYPE_MAP } from './dataType';
 
-const FEATURES_QUERY = gql`
+const QUERY = gql`
   query Features($productId: ID!) {
     product(productId: $productId) {
       id
@@ -15,16 +16,32 @@ const FEATURES_QUERY = gql`
         id
         key
       }
+      userTraits {
+        name
+        dataType
+      }
+      teamTraits {
+        name
+        dataType
+      }
     }
   }
 `;
 
-type FeaturesQuery = {
+type Query = {
   product: {
     id: string;
     features: Array<{
       id: string;
       key: string;
+    }>;
+    userTraits: Array<{
+      name: string;
+      dataType: DataType;
+    }>;
+    teamTraits: Array<{
+      name: string;
+      dataType: DataType;
     }>;
   };
 };
@@ -55,10 +72,9 @@ export async function generate() {
     },
   });
 
-  const { product } = await graphqlClient.request<FeaturesQuery>(
-    FEATURES_QUERY,
-    { productId },
-  );
+  const { product } = await graphqlClient.request<Query>(QUERY, {
+    productId,
+  });
 
   const { features } = product;
 
@@ -72,6 +88,10 @@ export async function generate() {
     overwrite: true,
   });
 
+  source.addImportDeclaration({
+    moduleSpecifier: 'react',
+    namedImports: ['useCallback'],
+  });
   source.addImportDeclaration({
     moduleSpecifier: '@unrevealed/react',
     namedImports: ['useUnrevealed'],
@@ -96,7 +116,10 @@ export async function generate() {
   source.addTypeAlias({
     name: 'UserTraits',
     type: Writers.objectType({
-      properties: [],
+      properties: product.userTraits.map((trait) => ({
+        name: trait.name,
+        type: DATA_TYPE_MAP[trait.dataType],
+      })),
     }),
     isExported: true,
   });
@@ -120,7 +143,10 @@ export async function generate() {
   source.addTypeAlias({
     name: 'TeamTraits',
     type: Writers.objectType({
-      properties: [],
+      properties: product.teamTraits.map((trait) => ({
+        name: trait.name,
+        type: DATA_TYPE_MAP[trait.dataType],
+      })),
     }),
     isExported: true,
   });
@@ -161,10 +187,10 @@ export async function generate() {
   source.addFunction({
     name: 'useIdentify',
     isExported: true,
-    statements: `const { identify: unsafeIdentify } = useUnrevealed();
-      const identify = ({ user, team }: { user: User | null; team?: Team | null }) => {
-        unsafeIdentify({ user, team })
-      };
+    statements: `const { identify: looseIdentify } = useUnrevealed();
+      const identify = useCallback(({ user, team }: { user: User | null; team?: Team | null }) => {
+        looseIdentify({ user, team })
+      }, [looseIdentify]);
 
       return { identify };`,
   });
