@@ -14,7 +14,7 @@ export function useFetchFeatures({
   user,
   team,
 }: FetchFeaturesOptions) {
-  const [features, setFeatures] = useState<string[]>([]);
+  const [features, setFeatures] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,9 +28,9 @@ export function useFetchFeatures({
       body: serializeBody({ user, team }),
     })
       .then((response) => response.json())
-      .then((data) => {
+      .then((data: { features: string[] }) => {
         if (!isCancelled) {
-          setFeatures(data.features);
+          setFeatures(new Set(data.features));
         }
       })
       .catch((err: Error) => {

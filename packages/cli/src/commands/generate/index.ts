@@ -74,7 +74,7 @@ export async function generate() {
 
   source.addImportDeclaration({
     moduleSpecifier: '@unrevealed/react',
-    namedImports: ['useFeature'],
+    namedImports: ['useUnrevealed'],
   });
 
   const featureKeys = features.map((feature) => `'${feature.key}'`);
@@ -93,13 +93,21 @@ export async function generate() {
     isExported: true,
   });
 
-  const safeHookDeclaration = source.addFunction({
-    name: 'useFeatureSafe',
+  const typedHookDeclaration = source.addFunction({
+    name: 'useFeature',
     isExported: true,
-    statements: `return useFeature(key);`,
+    statements: `
+      const { features, loading, error } = useUnrevealed();
+      
+      return {
+        enabled: features.has(featureKey),
+        loading,
+        error,
+      };
+    `,
   });
 
-  safeHookDeclaration.addParameter({
+  typedHookDeclaration.addParameter({
     name: 'key',
     type: 'FeatureKey',
   });
@@ -111,7 +119,7 @@ export async function generate() {
         .map((word) => word.replace(/(^[a-z])/, (group) => group.toUpperCase()))
         .join('')}Feature`,
       isExported: true,
-      statements: `return useFeatureSafe('${feature.key}');`,
+      statements: `return useFeature('${feature.key}');`,
     });
   });
 

@@ -18,7 +18,7 @@ export function FeatureToggler() {
       }}
     >
       <ul style={{ listStyle: 'none', padding: 12, margin: 0 }}>
-        {allFeatures.map((feature) => {
+        {[...allFeatures].map((feature) => {
           const id = `unrevealed-switch-${feature}`;
           return (
             <li
@@ -33,14 +33,18 @@ export function FeatureToggler() {
                 type="checkbox"
                 name={feature}
                 id={id}
-                checked={!filteredFeatures.includes(feature)}
+                checked={!filteredFeatures.has(feature)}
                 onChange={(event) => {
                   if (event.currentTarget.checked) {
                     setFilteredFeatures(
-                      filteredFeatures.filter((f) => feature !== f),
+                      new Set(
+                        [...filteredFeatures].filter((f) => feature !== f),
+                      ),
                     );
                   } else {
-                    setFilteredFeatures([...filteredFeatures, feature]);
+                    setFilteredFeatures(
+                      new Set([...filteredFeatures, feature]),
+                    );
                   }
                 }}
               />

@@ -4,12 +4,12 @@ import { Team, User } from './types';
 
 export interface UnrevealedContextValue {
   clientKey: string;
-  allFeatures: string[];
-  activeFeatures: string[];
+  allFeatures: Set<string>;
+  activeFeatures: Set<string>;
   loading: boolean;
   error: string | null;
-  filteredFeatures: string[];
-  setFilteredFeatures: (features: string[]) => void;
+  filteredFeatures: Set<string>;
+  setFilteredFeatures: (features: Set<string>) => void;
   trackingUrl: string;
   setUser: (user: User | null) => void;
   setTeam: (user: Team | null) => void;
@@ -17,11 +17,11 @@ export interface UnrevealedContextValue {
 
 export const UnrevealedContext = createContext<UnrevealedContextValue>({
   clientKey: '',
-  allFeatures: [],
-  activeFeatures: [],
+  allFeatures: new Set(),
+  activeFeatures: new Set(),
   loading: true,
   error: null,
-  filteredFeatures: [],
+  filteredFeatures: new Set(),
   setFilteredFeatures: () => [],
   trackingUrl: TRACKING_URL,
   setUser: () => {},

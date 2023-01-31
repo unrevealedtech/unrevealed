@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { TRACKING_URL } from './constants';
 import { UnrevealedContext } from './context';
@@ -23,26 +23,37 @@ export function UnrevealedProvider({
   ...props
 }: UnrevealedProviderProps) {
   const { trackingUrl } = props as AdditionalProps;
-  const [filteredFeatures, setFilteredFeatures] = useState<string[]>([]);
+  const [filteredFeatures, setFilteredFeatures] = useState<Set<string>>(
+    new Set(),
+  );
+
   const [user, setUser] = useState<User | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
 
-  const { features, loading, error } = useFetchFeatures({
+  const {
+    features: allFeatures,
+    loading,
+    error,
+  } = useFetchFeatures({
     clientKey,
     user,
     team,
   });
 
-  const activeFeatures =
-    filteredFeatures.length > 0
-      ? features.filter((feature) => !filteredFeatures.includes(feature))
-      : features;
+  const activeFeatures = useMemo(() => {
+    if (filteredFeatures.size === 0) {
+      return allFeatures;
+    }
+    return new Set(
+      [...allFeatures].filter((feature) => !filteredFeatures.has(feature)),
+    );
+  }, [filteredFeatures, allFeatures]);
 
   return (
     <UnrevealedContext.Provider
       value={{
         clientKey,
-        allFeatures: features,
+        allFeatures,
         activeFeatures,
         loading,
         error,

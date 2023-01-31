@@ -7,11 +7,14 @@ export interface UseFeatureResult {
   error: string | null;
 }
 
+/**
+ * @deprecated
+ */
 export function useFeature(featureKey: string) {
   const { error, loading, activeFeatures } = useContext(UnrevealedContext);
 
   return {
-    enabled: activeFeatures.includes(featureKey),
+    enabled: activeFeatures.has(featureKey),
     loading,
     error,
   };
