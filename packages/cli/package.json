@@ -1,6 +1,6 @@
 {
   "name": "@unrevealed/cli",
-  "version": "0.0.2-rc.2",
+  "version": "0.0.2-rc.3",
   "description": "Unrevealed",
   "scripts": {
     "publish-canary": "pnpm publish --tag canary",

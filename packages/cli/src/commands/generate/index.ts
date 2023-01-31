@@ -96,15 +96,13 @@ export async function generate() {
   const typedHookDeclaration = source.addFunction({
     name: 'useFeature',
     isExported: true,
-    statements: `
-      const { features, loading, error } = useUnrevealed();
+    statements: `const { features, loading, error } = useUnrevealed();
       
       return {
         enabled: features.has(key),
         loading,
         error,
-      };
-    `,
+      };`,
   });
 
   typedHookDeclaration.addParameter({
