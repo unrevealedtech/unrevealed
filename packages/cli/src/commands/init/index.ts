@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import { ClientError, gql, GraphQLClient } from 'graphql-request';
 import inquirer from 'inquirer';
 import path from 'path';
-import { readToken } from '~/utils/auth';
+import { readToken } from '~/auth';
 
 const BASE_API_URL = process.env.BASE_API_URL ?? 'https://api.unrevealed.tech';
 const API_URL = `${BASE_API_URL}/graphql`;
@@ -41,21 +41,27 @@ export async function link() {
     return;
   }
 
-  const client = new GraphQLClient(API_URL, {
+  const graphqlClient = new GraphQLClient(API_URL, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
   try {
-    const { products } = await client.request<ProductsQuery>(PRODUCTS_QUERY);
+    const { products } = await graphqlClient.request<ProductsQuery>(
+      PRODUCTS_QUERY,
+    );
 
     if (products.length === 0) {
       logError('Could not find any product');
       return;
     }
 
-    const { productId } = await inquirer.prompt([
+    const { productId, client, generatedFile } = await inquirer.prompt<{
+      productId: string;
+      client: 'react';
+      generatedFile: string;
+    }>([
       {
         name: 'productId',
         type: 'list',
@@ -65,9 +71,25 @@ export async function link() {
           value: product.id,
         })),
       },
+      {
+        name: 'client',
+        type: 'list',
+        message: 'Which SDK would you like to use for this project?',
+        choices: [
+          {
+            name: 'React',
+            value: 'react',
+          },
+        ],
+      },
+      {
+        name: 'generatedFile',
+        type: 'input',
+        default: path.join('src', 'generated', 'unrevealed.ts'),
+      },
     ]);
 
-    await writeConfig({ productId });
+    await writeConfig({ productId, client, generatedFile });
 
     console.log(chalk.green('>>> Created unrevealed.config.json'));
   } catch (err) {
@@ -96,9 +118,25 @@ function logError(...texts: string[]) {
   );
 }
 
-async function writeConfig({ productId }: { productId: string }) {
+async function writeConfig({
+  productId,
+  generatedFile,
+  client,
+}: {
+  productId: string;
+  generatedFile: string;
+  client: 'react';
+}) {
   const { stdout: projectDir } = await execa('npm', ['prefix']);
 
   const configFile = path.join(projectDir, 'unrevealed.config.json');
-  await fs.writeJSON(configFile, { productId }, { spaces: 2 });
+  await fs.writeJSON(
+    configFile,
+    {
+      productId,
+      generate: generatedFile,
+      client,
+    },
+    { spaces: 2 },
+  );
 }

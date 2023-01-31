@@ -3,7 +3,7 @@ import { Socket } from 'net';
 import open from 'open';
 import ora from 'ora';
 import url from 'url';
-import { writeToken } from '~/utils/auth';
+import { writeToken } from '~/auth';
 
 const PORT = 9789;
 const HOST = 'http://127.0.0.1';
