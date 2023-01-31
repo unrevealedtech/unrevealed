@@ -4,11 +4,11 @@ import open from 'open';
 import ora from 'ora';
 import url from 'url';
 import { writeToken } from '~/auth';
+import { BASE_APP_URL } from '~/constants';
 
 const PORT = 9789;
 const HOST = 'http://127.0.0.1';
 const REDIRECT_URI = `${HOST}:${PORT}`;
-const BASE_APP_URL = process.env.BASE_APP_URL || 'https://app.unrevealed.tech';
 const AUTH_URL = `${BASE_APP_URL}/cli/auth/token?redirect_uri=${encodeURIComponent(
   REDIRECT_URI,
 )}`;

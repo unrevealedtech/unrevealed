@@ -4,6 +4,6 @@ export default defineConfig((options: Options) => ({
   entry: ['src/cli.ts'],
   format: ['cjs'],
   clean: true,
-  noExternal: ['chalk', 'ora', 'inquirer', 'execa'],
+  noExternal: ['chalk', 'ora', 'inquirer', 'execa', 'find-up'],
   ...options,
 }));

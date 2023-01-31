@@ -5,9 +5,8 @@ import { ClientError, gql, GraphQLClient } from 'graphql-request';
 import inquirer from 'inquirer';
 import path from 'path';
 import { readToken } from '~/auth';
-
-const BASE_API_URL = process.env.BASE_API_URL ?? 'https://api.unrevealed.tech';
-const API_URL = `${BASE_API_URL}/graphql`;
+import { API_URL } from '~/constants';
+import { logError, logUnauthorized } from '~/logger';
 
 const PRODUCTS_QUERY = gql`
   query Products {
@@ -102,20 +101,6 @@ export async function init() {
       }
     }
   }
-}
-
-function logUnauthorized() {
-  logError(
-    chalk.red('User not found. Please login to Unrevealed first by running'),
-    chalk.red.bold('`unrev login`'),
-  );
-}
-
-function logError(...texts: string[]) {
-  console.log(
-    chalk.bgRed.white.bold(' ERROR '),
-    ...texts.map((text) => chalk.red(text)),
-  );
 }
 
 async function writeConfig({
