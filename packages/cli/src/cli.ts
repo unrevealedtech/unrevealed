@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { version } from '../package.json';
-import { link } from './commands/init';
+import { init } from './commands/init';
 import { login } from './commands/login';
 
 const program = new Command();
@@ -15,6 +15,6 @@ program
 program
   .command('init')
   .description('Link your local directory to an Unrevealed project')
-  .action(link);
+  .action(init);
 
 program.parse();

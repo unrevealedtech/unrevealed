@@ -33,7 +33,7 @@ type ProductsQuery = {
   }>;
 };
 
-export async function link() {
+export async function init() {
   const token = await readToken();
 
   if (!token) {
