@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+    "lib": ["ES6", "DOM"],
+    "target": "ES6",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "./lib",
+    "declarationDir": "./lib/types",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -10,5 +16,5 @@
     "declarationMap": true,
     "allowSyntheticDefaultImports": true
   },
-  "files": ["../src/index.ts"]
+  "files": ["./src/index.ts"]
 }
