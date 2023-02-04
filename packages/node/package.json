@@ -1,0 +1,44 @@
+{
+  "name": "@unrevealed/node",
+  "version": "0.0.0",
+  "description": "Unrevealed SDK for Node",
+  "main": "./lib/cjs/index.js",
+  "types": "./lib/cjs/types/index.d.ts",
+  "scripts": {
+    "publish-canary": "pnpm publish --tag canary",
+    "publish-latest": "pnpm publish --tag latest",
+    "prepare": "pnpm run build",
+    "lint": "pnpm eslint src/",
+    "clean": "rm -rf ./lib",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
+    "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
+    "prepack": "npm run build"
+  },
+  "keywords": [],
+  "author": "Unrevealed",
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "@typescript-eslint/parser": "^5.50.0",
+    "eslint": "^8.33.0",
+    "prettier": "^2.7.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.9.5"
+  },
+  "files": [
+    "lib"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  }
+}
