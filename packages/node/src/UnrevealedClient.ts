@@ -1,4 +1,5 @@
 import EventSource from 'eventsource';
+import { UnauthorizedException } from './errors';
 import { Logger } from './Logger';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
@@ -9,7 +10,7 @@ interface FeatureAccess {
   accessUsers: string[];
 }
 
-enum ReadyState {
+export enum ReadyState {
   UNINITIALIZED,
   CONNECTING,
   READY,
@@ -25,118 +26,171 @@ export interface UnrevealedClientOptions {
 }
 
 export class UnrevealedClient {
-  private eventSource: EventSource | null = null;
-  private featureAccesses: Record<string, FeatureAccess> = {};
-  private readonly apiKey: string;
-  private readonly apiUrl: string;
-  private logger = new Logger();
-  private readyState: ReadyState = ReadyState.UNINITIALIZED;
-  private connectAttempts = 0;
+  private _eventSource: EventSource | null = null;
+  private _featureAccesses: Record<string, FeatureAccess> = {};
+  private readonly _apiKey: string;
+  private readonly _apiUrl: string;
+  private _logger = new Logger();
+  private _readyState: ReadyState = ReadyState.UNINITIALIZED;
+  private _connectionPromise: Promise<void> | null = null;
 
   constructor({ apiKey, apiUrl = SSE_API_URL }: UnrevealedClientOptions) {
-    this.apiKey = apiKey;
-    this.apiUrl = apiUrl;
+    this._apiKey = apiKey;
+    this._apiUrl = apiUrl;
   }
 
-  connect() {
+  get readyState() {
+    return this._readyState;
+  }
+
+  async connect(): Promise<boolean> {
+    if (this._isReady()) {
+      return true;
+    }
+
     const isConnectableState =
-      this.readyState === ReadyState.UNINITIALIZED ||
-      this.readyState === ReadyState.CLOSED;
-    const hasReachedMaxAttempts = this.connectAttempts >= RETRY_MAX_ATTEMPTS;
-
-    if (!isConnectableState || hasReachedMaxAttempts) {
-      return;
+      this._readyState === ReadyState.UNINITIALIZED ||
+      this._readyState === ReadyState.CLOSED;
+    if (isConnectableState) {
+      this._connectionPromise = this._connectRecursive();
     }
 
-    this.connectAttempts += 1;
-    this.readyState = ReadyState.CONNECTING;
+    await this._connectionPromise;
 
-    try {
-      const eventSource = this.createEventSource();
-
-      eventSource.addEventListener('put', (event) => this.handlePut(event));
-      eventSource.addEventListener('patch', (event) => this.handlePatch(event));
-      eventSource.addEventListener('error', (event) => this.handleError(event));
-
-      this.eventSource = eventSource;
-    } catch (err) {
-      this.close();
-      this.logger.error(`Error initializing Unrevealed client: ${err}`);
-    }
+    return this._isReady();
   }
 
   close() {
-    this.closeConnection();
-    this.featureAccesses = {};
+    this._closeExistingEventSource();
+    this._readyState = ReadyState.CLOSED;
+    this._featureAccesses = {};
   }
 
-  private closeConnection() {
-    this.eventSource?.close();
-    this.eventSource = null;
-    this.readyState =
-      this.readyState === ReadyState.CONNECTING
-        ? ReadyState.UNINITIALIZED
-        : ReadyState.CLOSED;
+  private _isReady() {
+    return this._readyState === ReadyState.READY;
   }
 
-  private createEventSource() {
-    return new EventSource(`${this.apiUrl}/rules`, {
+  private async _connectRecursive(attempt: number = 1) {
+    this._readyState = ReadyState.CONNECTING;
+
+    try {
+      await this._connect();
+      this._readyState = ReadyState.READY;
+      this._logger.log('Connection to Unrevealed established');
+    } catch (err) {
+      if (err instanceof UnauthorizedException) {
+        this._logger.error('Unauthorized, please check your API key');
+        return;
+      }
+
+      if (attempt >= RETRY_MAX_ATTEMPTS) {
+        this._logger.error('Maximum connection attempts reached');
+        this.close();
+        return;
+      }
+
+      this._logger.error(`Connection to Unrevealed failed: ${err}`);
+      this._logger.error(`Reconnecting...`);
+      return new Promise<void>((resolve) => {
+        setTimeout(async () => {
+          await this._connectRecursive(attempt + 1);
+          resolve();
+        }, RETRY_INTERVAL_MS);
+      });
+    }
+  }
+
+  private async _connect() {
+    this._closeExistingEventSource();
+
+    return new Promise<void>((resolve, reject) => {
+      const rejectPromise = (err: unknown) => {
+        reject(err);
+      };
+      const resolvePromise = () => {
+        resolve();
+      };
+
+      try {
+        const eventSource = this._createEventSource();
+
+        eventSource.addEventListener('error', (event) => {
+          if (this._readyState === ReadyState.CONNECTING) {
+            if ('status' in event && event.status === 401) {
+              rejectPromise(new UnauthorizedException());
+              return;
+            }
+            let errorMessage = 'Could not connect to Unrevealed';
+            if ('message' in event) {
+              errorMessage = `${errorMessage}: ${event.message}`;
+            }
+            rejectPromise(errorMessage);
+            return;
+          }
+
+          this._handleError(event);
+        });
+
+        eventSource.addEventListener('put', async (event) => {
+          try {
+            this._handlePut(event);
+            resolvePromise();
+          } catch (err) {
+            rejectPromise(err);
+          }
+        });
+
+        eventSource.addEventListener('patch', (event) =>
+          this._handlePatch(event),
+        );
+
+        this._eventSource = eventSource;
+      } catch (err) {
+        reject(new Error(`Error initializing Unrevealed client: ${err}`));
+      }
+    });
+  }
+
+  async rules() {
+    await this._connectionPromise;
+
+    return this._featureAccesses;
+  }
+
+  private _closeExistingEventSource() {
+    this._eventSource?.close();
+    this._eventSource = null;
+  }
+
+  private _createEventSource() {
+    return new EventSource(`${this._apiUrl}/rules`, {
       headers: {
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${this._apiKey}`,
       },
     });
   }
 
-  private handleError(event: MessageEvent) {
-    if (this.readyState === ReadyState.READY) {
-      this.logger.log('Connection to Unrevealed was closed, reconnecting');
-      this.closeConnection();
-      this.connect();
-    } else if (this.readyState === ReadyState.CONNECTING) {
-      this.close();
-      if ('status' in event && event.status === 401) {
-        this.logger.error('Unauthorized, please check your API key');
-        return;
-      }
-      let errorMessage = 'Could not connect to Unrevealed';
-      if ('message' in event) {
-        errorMessage = `${errorMessage}: ${event.message}`;
-      }
-      this.logger.error(errorMessage);
-
-      if (this.connectAttempts > RETRY_MAX_ATTEMPTS) {
-        this.logger.error('Maximum connection attempts reached');
-
-        this.connectAttempts = 0;
-        return;
-      }
-
-      this.logger.log('Reconnecting...');
-
-      setTimeout(() => this.connect(), RETRY_INTERVAL_MS);
+  private _handleError(_event: MessageEvent) {
+    if (this._readyState === ReadyState.READY) {
+      this._connectRecursive();
+      return;
     }
   }
 
-  private handlePut(event: MessageEvent) {
-    if (this.readyState !== ReadyState.CONNECTING) {
+  private _handlePut(event: MessageEvent) {
+    if (this._readyState !== ReadyState.CONNECTING) {
       return;
     }
 
     try {
-      this.connectAttempts = 0;
-      this.readyState = ReadyState.READY;
-      this.featureAccesses = JSON.parse(event.data);
-
-      this.logger.log('Connection to Unrevealed established');
+      this._featureAccesses = JSON.parse(event.data);
     } catch (err) {
-      this.logger.error('Could not parse push event, closing connection');
-
-      this.close();
+      throw new Error('Could not parse push event');
     }
   }
 
-  private handlePatch(event: MessageEvent) {
-    if (this.readyState !== ReadyState.READY) {
+  private _handlePatch(event: MessageEvent) {
+    if (this._readyState !== ReadyState.READY) {
       return;
     }
 
@@ -146,16 +200,16 @@ export class UnrevealedClient {
       );
       Object.keys(featureAccesses).map((featureId) => {
         if (featureAccesses[featureId] === null) {
-          if (featureId in this.featureAccesses) {
-            delete this.featureAccesses[featureId];
+          if (featureId in this._featureAccesses) {
+            delete this._featureAccesses[featureId];
           }
           return;
         }
 
-        this.featureAccesses[featureId] = featureAccesses[featureId]!;
+        this._featureAccesses[featureId] = featureAccesses[featureId]!;
       });
     } catch (err) {
-      this.logger.error('Could not parse patch event');
+      this._logger.error('Could not parse patch event');
     }
   }
 }
