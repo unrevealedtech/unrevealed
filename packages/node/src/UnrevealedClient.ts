@@ -93,17 +93,21 @@ export class UnrevealedClient {
     }
 
     if (readyState === ReadyState.CONNECTING) {
-      let errorMessage = 'Could not connect to Unrevealed API';
+      let errorMessage = 'Could not connect to Unrevealed';
       if ('message' in event) {
         errorMessage = `${errorMessage}: ${event.message}`;
       }
       this.logger.error(errorMessage);
+
       if (this.connectAttempts > RETRY_MAX_ATTEMPTS) {
         this.logger.error('Maximum connection attempts reached');
+
         this.connectAttempts = 0;
         return;
       }
+
       this.logger.log('Reconnecting...');
+
       setTimeout(() => this.connect(), RETRY_INTERVAL_MS);
     }
   }
@@ -118,7 +122,7 @@ export class UnrevealedClient {
       this.readyState = ReadyState.READY;
       this.featureAccesses = JSON.parse(event.data);
 
-      this.logger.log('Connection to Unrevealed API established');
+      this.logger.log('Connection to Unrevealed established');
     } catch (err) {
       this.logger.error('Could not parse push event, closing connection');
 
