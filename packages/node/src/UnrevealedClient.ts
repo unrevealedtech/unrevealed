@@ -38,7 +38,7 @@ export class UnrevealedClient {
     this.apiUrl = apiUrl;
   }
 
-  async connect() {
+  connect() {
     const isConnectableState =
       this.readyState === ReadyState.UNINITIALIZED ||
       this.readyState === ReadyState.CLOSED;
@@ -65,10 +65,14 @@ export class UnrevealedClient {
     }
   }
 
-  async close() {
+  close() {
+    this.closeConnection();
+    this.featureAccesses = {};
+  }
+
+  private closeConnection() {
     this.eventSource?.close();
     this.eventSource = null;
-    this.featureAccesses = {};
     this.readyState =
       this.readyState === ReadyState.CONNECTING
         ? ReadyState.UNINITIALIZED
@@ -84,15 +88,16 @@ export class UnrevealedClient {
   }
 
   private handleError(event: MessageEvent) {
-    const readyState = this.readyState;
-    this.close();
-
-    if ('status' in event && event.status === 401) {
-      this.logger.error('Unauthorized, please check your API key');
-      return;
-    }
-
-    if (readyState === ReadyState.CONNECTING) {
+    if (this.readyState === ReadyState.READY) {
+      this.logger.log('Connection to Unrevealed was closed, reconnecting');
+      this.closeConnection();
+      this.connect();
+    } else if (this.readyState === ReadyState.CONNECTING) {
+      this.close();
+      if ('status' in event && event.status === 401) {
+        this.logger.error('Unauthorized, please check your API key');
+        return;
+      }
       let errorMessage = 'Could not connect to Unrevealed';
       if ('message' in event) {
         errorMessage = `${errorMessage}: ${event.message}`;
