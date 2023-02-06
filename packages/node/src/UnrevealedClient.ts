@@ -87,6 +87,11 @@ export class UnrevealedClient {
     const readyState = this.readyState;
     this.close();
 
+    if ('status' in event && event.status === 401) {
+      this.logger.error('Unauthorized, please check your API key');
+      return;
+    }
+
     if (readyState === ReadyState.CONNECTING) {
       let errorMessage = 'Could not connect to Unrevealed API';
       if ('message' in event) {
