@@ -16,6 +16,9 @@ enum ReadyState {
   CLOSED,
 }
 
+const RETRY_INTERVAL_MS = 2000;
+const RETRY_MAX_ATTEMPTS = 5;
+
 export interface UnrevealedClientOptions {
   apiKey: string;
   apiUrl?: string;
@@ -28,6 +31,7 @@ export class UnrevealedClient {
   private readonly apiUrl: string;
   private logger = new Logger();
   private readyState: ReadyState = ReadyState.UNINITIALIZED;
+  private connectAttempts = 0;
 
   constructor({ apiKey, apiUrl = SSE_API_URL }: UnrevealedClientOptions) {
     this.apiKey = apiKey;
@@ -35,6 +39,16 @@ export class UnrevealedClient {
   }
 
   async connect() {
+    const isConnectableState =
+      this.readyState === ReadyState.UNINITIALIZED ||
+      this.readyState === ReadyState.CLOSED;
+    const hasReachedMaxAttempts = this.connectAttempts >= RETRY_MAX_ATTEMPTS;
+
+    if (!isConnectableState || hasReachedMaxAttempts) {
+      return;
+    }
+
+    this.connectAttempts += 1;
     this.readyState = ReadyState.CONNECTING;
 
     try {
@@ -46,9 +60,8 @@ export class UnrevealedClient {
 
       this.eventSource = eventSource;
     } catch (err) {
-      this.logger.error('Error initializing Unrevealed client');
       this.close();
-      throw err;
+      this.logger.error(`Error initializing Unrevealed client: ${err}`);
     }
   }
 
@@ -56,7 +69,10 @@ export class UnrevealedClient {
     this.eventSource?.close();
     this.eventSource = null;
     this.featureAccesses = {};
-    this.readyState = ReadyState.CLOSED;
+    this.readyState =
+      this.readyState === ReadyState.CONNECTING
+        ? ReadyState.UNINITIALIZED
+        : ReadyState.CLOSED;
   }
 
   private createEventSource() {
@@ -68,33 +84,48 @@ export class UnrevealedClient {
   }
 
   private handleError(event: MessageEvent) {
-    let message = 'Error connecting to Unrevealed API';
+    const readyState = this.readyState;
+    this.close();
 
-    if ('message' in event) {
-      message = `${message}: ${event.message}`;
-    }
-
-    this.logger.error(message);
-
-    if (this.readyState === ReadyState.CONNECTING) {
-      this.close();
+    if (readyState === ReadyState.CONNECTING) {
+      let errorMessage = 'Could not connect to Unrevealed API';
+      if ('message' in event) {
+        errorMessage = `${errorMessage}: ${event.message}`;
+      }
+      this.logger.error(errorMessage);
+      if (this.connectAttempts > RETRY_MAX_ATTEMPTS) {
+        this.logger.error('Maximum connection attempts reached');
+        this.connectAttempts = 0;
+        return;
+      }
+      this.logger.log('Reconnecting...');
+      setTimeout(() => this.connect(), RETRY_INTERVAL_MS);
     }
   }
 
   private handlePut(event: MessageEvent) {
+    if (this.readyState !== ReadyState.CONNECTING) {
+      return;
+    }
+
     try {
+      this.connectAttempts = 0;
+      this.readyState = ReadyState.READY;
       this.featureAccesses = JSON.parse(event.data);
-      if (this.readyState === ReadyState.CONNECTING) {
-        this.readyState = ReadyState.READY;
-        this.logger.log('Connection to Unrevealed API established');
-      }
+
+      this.logger.log('Connection to Unrevealed API established');
     } catch (err) {
+      this.logger.error('Could not parse push event, closing connection');
+
       this.close();
-      this.logger.error('Error parsing data, disconnecting Unrevealed');
     }
   }
 
   private handlePatch(event: MessageEvent) {
+    if (this.readyState !== ReadyState.READY) {
+      return;
+    }
+
     try {
       const featureAccesses: Record<string, FeatureAccess | null> = JSON.parse(
         event.data,
@@ -110,7 +141,7 @@ export class UnrevealedClient {
         this.featureAccesses[featureId] = featureAccesses[featureId]!;
       });
     } catch (err) {
-      this.logger.error('Error parsing data');
+      this.logger.error('Could not parse patch event');
     }
   }
 }
