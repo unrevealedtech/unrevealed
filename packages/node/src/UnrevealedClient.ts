@@ -1,4 +1,5 @@
 import EventSource from 'eventsource';
+import { Logger } from './Logger';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
 
@@ -8,11 +9,6 @@ interface FeatureAccess {
   accessUsers: string[];
 }
 
-export interface UnrevealedClientOptions {
-  apiKey: string;
-  apiUrl?: string;
-}
-
 enum ReadyState {
   UNINITIALIZED,
   CONNECTING,
@@ -20,11 +16,17 @@ enum ReadyState {
   CLOSED,
 }
 
+export interface UnrevealedClientOptions {
+  apiKey: string;
+  apiUrl?: string;
+}
+
 export class UnrevealedClient {
   private eventSource: EventSource | null = null;
   private featureAccesses: Record<string, FeatureAccess> = {};
   private readonly apiKey: string;
   private readonly apiUrl: string;
+  private logger = new Logger();
   private readyState: ReadyState = ReadyState.UNINITIALIZED;
 
   constructor({ apiKey, apiUrl = SSE_API_URL }: UnrevealedClientOptions) {
@@ -44,7 +46,7 @@ export class UnrevealedClient {
 
       this.eventSource = eventSource;
     } catch (err) {
-      console.error('Error initializing Unrevealed client');
+      this.logger.error('Error initializing Unrevealed client');
       this.close();
       throw err;
     }
@@ -72,7 +74,7 @@ export class UnrevealedClient {
       message = `${message}: ${event.message}`;
     }
 
-    console.error(message);
+    this.logger.error(message);
 
     if (this.readyState === ReadyState.CONNECTING) {
       this.close();
@@ -84,11 +86,11 @@ export class UnrevealedClient {
       this.featureAccesses = JSON.parse(event.data);
       if (this.readyState === ReadyState.CONNECTING) {
         this.readyState = ReadyState.READY;
-        console.log('Connection to Unrevealed API established');
+        this.logger.log('Connection to Unrevealed API established');
       }
     } catch (err) {
       this.close();
-      console.error('Error parsing data, disconnecting Unrevealed');
+      this.logger.error('Error parsing data, disconnecting Unrevealed');
     }
   }
 
@@ -108,7 +110,7 @@ export class UnrevealedClient {
         this.featureAccesses[featureId] = featureAccesses[featureId]!;
       });
     } catch (err) {
-      console.error('Error parsing data');
+      this.logger.error('Error parsing data');
     }
   }
 }
