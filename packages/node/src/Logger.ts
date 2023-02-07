@@ -4,6 +4,6 @@ export class Logger {
   }
 
   error(message: string) {
-    console.log(`[ERROR] unrevealed: ${message}`);
+    console.error(`[ERROR] unrevealed: ${message}`);
   }
 }
