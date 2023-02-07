@@ -22,8 +22,15 @@ const RETRY_MAX_ATTEMPTS = 5;
 
 export interface UnrevealedClientOptions {
   apiKey: string;
+}
+
+/** Options used in dev and not exposed in the public API */
+interface DevUnrevealedClientOptions {
   apiUrl?: string;
 }
+
+type AllUnrevealedClientOptions = UnrevealedClientOptions &
+  DevUnrevealedClientOptions;
 
 interface User {
   id: string;
@@ -44,9 +51,10 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   private _readyState: ReadyState = ReadyState.UNINITIALIZED;
   private _connectionPromise: Promise<void> | null = null;
 
-  constructor({ apiKey, apiUrl = SSE_API_URL }: UnrevealedClientOptions) {
-    this._apiKey = apiKey;
-    this._apiUrl = apiUrl;
+  constructor(options: UnrevealedClientOptions) {
+    const _options = options as AllUnrevealedClientOptions;
+    this._apiKey = _options.apiKey;
+    this._apiUrl = _options.apiUrl || SSE_API_URL;
   }
 
   get readyState() {
