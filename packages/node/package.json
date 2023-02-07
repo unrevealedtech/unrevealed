@@ -1,0 +1,33 @@
+{
+  "name": "@unrevealed/node",
+  "version": "0.0.1",
+  "description": "Unrevealed SDK for Node",
+  "main": "./lib/index.js",
+  "types": "./lib/types/index.d.ts",
+  "scripts": {
+    "publish-canary": "pnpm publish --tag canary",
+    "publish-latest": "pnpm publish --tag latest",
+    "lint": "pnpm eslint src/",
+    "clean": "rm -rf ./lib",
+    "build": "pnpm run clean && tsc",
+    "prepack": "pnpm run build"
+  },
+  "keywords": [],
+  "author": "Unrevealed",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/eventsource": "^1.1.11",
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "@typescript-eslint/parser": "^5.50.0",
+    "eslint": "^8.33.0",
+    "prettier": "^2.7.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.9.5"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "eventsource": "^2.0.2"
+  }
+}
