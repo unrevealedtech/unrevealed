@@ -84,6 +84,27 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     this._featureAccesses = {};
   }
 
+  async isFeatureEnabled(
+    featureKey: TFeatureKey,
+    { user, team }: { user?: User; team?: Team } = {},
+  ) {
+    await this._connectionPromise;
+
+    return this._isFeatureEnabledSync(featureKey, { user, team });
+  }
+
+  async getEnabledFeatures({
+    user,
+    team,
+  }: { user?: User; team?: Team } = {}): Promise<TFeatureKey[]> {
+    await this._connectionPromise;
+
+    const featureKeys = Object.keys(this._featureAccesses) as TFeatureKey[];
+    return featureKeys.filter((featureKey) =>
+      this._isFeatureEnabledSync(featureKey, { user, team }),
+    );
+  }
+
   private _isReady() {
     return this._readyState === ReadyState.READY;
   }
@@ -167,27 +188,6 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
         reject(new Error(`Error initializing Unrevealed client: ${err}`));
       }
     });
-  }
-
-  async isFeatureEnabled(
-    featureKey: TFeatureKey,
-    { user, team }: { user?: User; team?: Team } = {},
-  ) {
-    await this._connectionPromise;
-
-    return this._isFeatureEnabledSync(featureKey, { user, team });
-  }
-
-  async getEnabledFeatures({
-    user,
-    team,
-  }: { user?: User; team?: Team } = {}): Promise<TFeatureKey[]> {
-    await this._connectionPromise;
-
-    const featureKeys = Object.keys(this._featureAccesses) as TFeatureKey[];
-    return featureKeys.filter((featureKey) =>
-      this._isFeatureEnabledSync(featureKey, { user, team }),
-    );
   }
 
   private _isFeatureEnabledSync(
