@@ -6,8 +6,8 @@ const SSE_API_URL = 'https://sse.unrevealed.tech';
 
 interface FeatureAccess {
   fullAccess: boolean;
-  accessTeams: string[];
-  accessUsers: string[];
+  userAccess: string[];
+  teamAccess: string[];
 }
 
 export enum ReadyState {
@@ -25,9 +25,19 @@ export interface UnrevealedClientOptions {
   apiUrl?: string;
 }
 
-export class UnrevealedClient {
+interface User {
+  id: string;
+  traits?: Record<string, unknown>;
+}
+
+interface Team {
+  id: string;
+  traits?: Record<string, unknown>;
+}
+
+export class UnrevealedClient<TFeatureKey extends string = string> {
   private _eventSource: EventSource | null = null;
-  private _featureAccesses: Record<string, FeatureAccess> = {};
+  private _featureAccesses: Partial<Record<string, FeatureAccess>> = {};
   private readonly _apiKey: string;
   private readonly _apiUrl: string;
   private _logger = new Logger();
@@ -151,10 +161,46 @@ export class UnrevealedClient {
     });
   }
 
-  async rules() {
+  async isFeatureEnabled(
+    featureKey: TFeatureKey,
+    { user, team }: { user?: User; team?: Team } = {},
+  ) {
     await this._connectionPromise;
 
-    return this._featureAccesses;
+    return this._isFeatureEnabledSync(featureKey, { user, team });
+  }
+
+  async getEnabledFeatures({
+    user,
+    team,
+  }: { user?: User; team?: Team } = {}): Promise<TFeatureKey[]> {
+    await this._connectionPromise;
+
+    const featureKeys = Object.keys(this._featureAccesses) as TFeatureKey[];
+    return featureKeys.filter((featureKey) =>
+      this._isFeatureEnabledSync(featureKey, { user, team }),
+    );
+  }
+
+  private _isFeatureEnabledSync(
+    featureKey: TFeatureKey,
+    { user, team }: { user?: User; team?: Team } = {},
+  ) {
+    const featureAccess = this._featureAccesses[featureKey];
+
+    if (!featureAccess) {
+      return false;
+    }
+    if (featureAccess.fullAccess) {
+      return true;
+    }
+    if (user && featureAccess.userAccess.indexOf(user.id) !== -1) {
+      return true;
+    }
+    if (team && featureAccess.teamAccess.indexOf(team.id) !== -1) {
+      return true;
+    }
+    return false;
   }
 
   private _closeExistingEventSource() {
