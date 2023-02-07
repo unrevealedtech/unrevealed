@@ -1,1 +1,5 @@
-export { UnrevealedClient } from './UnrevealedClient';
+export {
+  ReadyState,
+  UnrevealedClient,
+  UnrevealedClientOptions,
+} from './UnrevealedClient';
