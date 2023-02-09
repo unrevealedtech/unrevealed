@@ -3,6 +3,7 @@ import { UnauthorizedException } from './errors';
 import { Logger } from './Logger';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
+const TRACKING_API_URL = 'https://track.unrevealed.tech';
 
 interface FeatureAccess {
   fullAccess: boolean;
@@ -27,6 +28,7 @@ export interface UnrevealedClientOptions {
 /** Options used in dev and not exposed in the public API */
 interface DevUnrevealedClientOptions {
   apiUrl?: string;
+  trackingUrl?: string;
 }
 
 type AllUnrevealedClientOptions = UnrevealedClientOptions &
@@ -47,6 +49,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   private _featureAccesses: Partial<Record<string, FeatureAccess>> = {};
   private readonly _apiKey: string;
   private readonly _apiUrl: string;
+  private readonly _trackingUrl: string;
   private _logger = new Logger();
   private _readyState: ReadyState = ReadyState.UNINITIALIZED;
   private _connectionPromise: Promise<void> | null = null;
@@ -55,6 +58,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     const _options = options as AllUnrevealedClientOptions;
     this._apiKey = _options.apiKey;
     this._apiUrl = _options.apiUrl || SSE_API_URL;
+    this._trackingUrl = _options.trackingUrl || TRACKING_API_URL;
   }
 
   get readyState() {
@@ -90,6 +94,8 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   ) {
     await this._connectionPromise;
 
+    this.identify({ user, team }).catch(() => {});
+
     return this._isFeatureEnabledSync(featureKey, { user, team });
   }
 
@@ -99,10 +105,37 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }: { user?: User; team?: Team } = {}): Promise<TFeatureKey[]> {
     await this._connectionPromise;
 
+    this.identify({ user, team }).catch(() => {});
+
     const featureKeys = Object.keys(this._featureAccesses) as TFeatureKey[];
     return featureKeys.filter((featureKey) =>
       this._isFeatureEnabledSync(featureKey, { user, team }),
     );
+  }
+
+  async identify({ user, team }: { user?: User; team?: Team }) {
+    if (user) {
+      await this._track('user', { userId: user.id, traits: user.traits });
+    }
+
+    if (team) {
+      await this._track('team', {
+        teamId: team.id,
+        userId: user?.id,
+        traits: team.traits,
+      });
+    }
+  }
+
+  async _track(type: 'user' | 'team', body: unknown) {
+    await fetch(`${this._trackingUrl}/identify-${type}`, {
+      method: 'post',
+      headers: {
+        'Client-Key': this._apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
   }
 
   private _isReady() {

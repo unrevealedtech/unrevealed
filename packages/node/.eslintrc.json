@@ -21,6 +21,7 @@
       {
         "argsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "no-empty": "off"
   }
 }
