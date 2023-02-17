@@ -8,9 +8,6 @@ import { useFetchFeatures } from './useFetchFeatures';
 export interface UnrevealedProviderProps {
   clientKey: string;
   children: React.ReactNode;
-  user?: User | undefined | null;
-  team: Team | undefined | null;
-  wait?: boolean;
 }
 
 interface AdditionalProps {
