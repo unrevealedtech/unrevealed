@@ -1,6 +1,6 @@
 {
   "name": "@unrevealed/react",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Unrevealed SDK for React",
   "main": "dist/main.js",
   "scripts": {
