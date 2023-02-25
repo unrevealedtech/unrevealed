@@ -7,9 +7,6 @@ export interface UseFeatureResult {
   error: string | null;
 }
 
-/**
- * @deprecated
- */
 export function useFeature(featureKey: string) {
   const { error, loading, activeFeatures } = useContext(UnrevealedContext);
 
