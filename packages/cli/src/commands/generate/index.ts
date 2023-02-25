@@ -12,7 +12,7 @@ const QUERY = gql`
   query Features($productId: ID!) {
     product(productId: $productId) {
       id
-      features {
+      features() {
         id
         key
       }

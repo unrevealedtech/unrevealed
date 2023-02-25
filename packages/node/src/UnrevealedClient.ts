@@ -1,6 +1,6 @@
 import EventSource from 'eventsource';
 import { UnauthorizedException } from './errors';
-import { Logger } from './Logger';
+import { Logger, UnrevealedLogger } from './Logger';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
 const TRACKING_API_URL = 'https://track.unrevealed.tech';
@@ -23,6 +23,7 @@ const RETRY_MAX_ATTEMPTS = 5;
 
 export interface UnrevealedClientOptions {
   apiKey: string;
+  logger?: Logger;
 }
 
 /** Options used in dev and not exposed in the public API */
@@ -50,7 +51,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   private readonly _apiKey: string;
   private readonly _apiUrl: string;
   private readonly _trackingUrl: string;
-  private _logger = new Logger();
+  private _logger: Logger;
   private _readyState: ReadyState = ReadyState.UNINITIALIZED;
   private _connectionPromise: Promise<void> | null = null;
 
@@ -59,6 +60,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     this._apiKey = _options.apiKey;
     this._apiUrl = _options.apiUrl || SSE_API_URL;
     this._trackingUrl = _options.trackingUrl || TRACKING_API_URL;
+    this._logger = options.logger ?? new UnrevealedLogger();
   }
 
   get readyState() {
@@ -66,6 +68,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }
 
   async connect(): Promise<boolean> {
+    console.log('connect');
     if (this._isReady()) {
       return true;
     }
@@ -176,27 +179,22 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     this._closeExistingEventSource();
 
     return new Promise<void>((resolve, reject) => {
-      const rejectPromise = (err: unknown) => {
-        reject(err);
-      };
-      const resolvePromise = () => {
-        resolve();
-      };
-
       try {
         const eventSource = this._createEventSource();
 
-        eventSource.addEventListener('error', (event) => {
+        eventSource.addEventListener('error', (event, ...args) => {
+          console.log('error', event, args);
+
           if (this._readyState === ReadyState.CONNECTING) {
             if ('status' in event && event.status === 401) {
-              rejectPromise(new UnauthorizedException());
+              reject(new UnauthorizedException());
               return;
             }
             let errorMessage = 'Could not connect to Unrevealed';
             if ('message' in event) {
               errorMessage = `${errorMessage}: ${event.message}`;
             }
-            rejectPromise(errorMessage);
+            reject(errorMessage);
             return;
           }
 
@@ -204,17 +202,19 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
         });
 
         eventSource.addEventListener('put', async (event) => {
+          console.log('put', event);
           try {
             this._handlePut(event);
-            resolvePromise();
+            resolve();
           } catch (err) {
-            rejectPromise(err);
+            reject(err);
           }
         });
 
-        eventSource.addEventListener('patch', (event) =>
-          this._handlePatch(event),
-        );
+        eventSource.addEventListener('patch', (event) => {
+          console.log('patch', event);
+          this._handlePatch(event);
+        });
 
         this._eventSource = eventSource;
       } catch (err) {
