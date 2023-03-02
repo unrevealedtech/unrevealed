@@ -19,7 +19,6 @@ export enum ReadyState {
 }
 
 const RETRY_INTERVAL_MS = 2000;
-const RETRY_MAX_ATTEMPTS = 5;
 
 export interface UnrevealedClientOptions {
   apiKey: string;
@@ -155,12 +154,6 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     } catch (err) {
       if (err instanceof UnauthorizedException) {
         this._logger.error('Unauthorized, please check your API key');
-        return;
-      }
-
-      if (attempt >= RETRY_MAX_ATTEMPTS) {
-        this._logger.error('Maximum connection attempts reached');
-        this.close();
         return;
       }
 
