@@ -1,10 +1,10 @@
 export interface UnrevealedLogger {
-  log(message: string): void;
+  info(message: string): void;
   error(message: string): void;
 }
 
 export class DefaultLogger implements UnrevealedLogger {
-  log(message: string) {
+  info(message: string) {
     console.log(`[INFO] unrevealed: ${message}`);
   }
 

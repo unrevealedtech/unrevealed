@@ -146,7 +146,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }
 
   private _log(message: string) {
-    this._logger.log(`unrevealed: ${message}`);
+    this._logger.info(`unrevealed: ${message}`);
   }
 
   private _logError(message: string) {
