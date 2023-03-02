@@ -23,6 +23,7 @@ const RETRY_INTERVAL_MS = 2000;
 export interface UnrevealedClientOptions {
   apiKey: string;
   logger?: Logger;
+  defaults?: Record<string, boolean>;
 }
 
 /** Options used in dev and not exposed in the public API */
@@ -46,20 +47,30 @@ interface Team {
 
 export class UnrevealedClient<TFeatureKey extends string = string> {
   private _eventSource: EventSource | null = null;
-  private _featureAccesses: Partial<Record<string, FeatureAccess>> = {};
+  private _featureAccesses: Map<TFeatureKey, FeatureAccess> = new Map();
+  private _readyState: ReadyState = ReadyState.UNINITIALIZED;
+  private _connectionPromise: Promise<void> | null = null;
+  private readonly _defaults: Map<TFeatureKey, boolean>;
   private readonly _apiKey: string;
   private readonly _apiUrl: string;
   private readonly _trackingUrl: string;
-  private _logger: Logger;
-  private _readyState: ReadyState = ReadyState.UNINITIALIZED;
-  private _connectionPromise: Promise<void> | null = null;
+  private readonly _logger: Logger;
 
   constructor(options: UnrevealedClientOptions) {
-    const _options = options as AllUnrevealedClientOptions;
-    this._apiKey = _options.apiKey;
-    this._apiUrl = _options.apiUrl || SSE_API_URL;
-    this._trackingUrl = _options.trackingUrl || TRACKING_API_URL;
-    this._logger = options.logger ?? new UnrevealedLogger();
+    const { apiKey, apiUrl, trackingUrl, logger, defaults } =
+      options as AllUnrevealedClientOptions;
+    this._apiKey = apiKey;
+    this._apiUrl = apiUrl || SSE_API_URL;
+    this._trackingUrl = trackingUrl || TRACKING_API_URL;
+    this._logger = logger ?? new UnrevealedLogger();
+
+    const defaultsEntries = defaults
+      ? Object.keys(defaults).map(
+          (featureKey) =>
+            [featureKey as TFeatureKey, defaults[featureKey]] as const,
+        )
+      : [];
+    this._defaults = new Map(defaultsEntries);
   }
 
   get readyState() {
@@ -86,7 +97,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   close() {
     this._closeExistingEventSource();
     this._readyState = ReadyState.CLOSED;
-    this._featureAccesses = {};
+    this._featureAccesses = new Map();
   }
 
   async isFeatureEnabled(
@@ -104,8 +115,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }: { user?: User; team?: Team } = {}): Promise<TFeatureKey[]> {
     await this._connectionPromise;
 
-    const featureKeys = Object.keys(this._featureAccesses) as TFeatureKey[];
-    return featureKeys.filter((featureKey) =>
+    return this._featureKeys.filter((featureKey) =>
       this._isFeatureEnabledSync(featureKey, { user, team }),
     );
   }
@@ -133,6 +143,12 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
       },
       body: JSON.stringify(body),
     });
+  }
+
+  private get _featureKeys(): TFeatureKey[] {
+    return [
+      ...new Set([...this._featureAccesses.keys(), ...this._defaults.keys()]),
+    ];
   }
 
   private _isReady() {
@@ -210,11 +226,11 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   private _isFeatureEnabledSync(
     featureKey: TFeatureKey,
     { user, team }: { user?: User; team?: Team } = {},
-  ) {
-    const featureAccess = this._featureAccesses[featureKey];
+  ): boolean {
+    const featureAccess = this._featureAccesses.get(featureKey);
 
     if (!featureAccess) {
-      return false;
+      return this._defaults.get(featureKey) ?? false;
     }
     if (featureAccess.fullAccess) {
       return true;
@@ -254,7 +270,15 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     }
 
     try {
-      this._featureAccesses = JSON.parse(event.data);
+      const featureAccessesData = JSON.parse(event.data);
+      const entries = Object.keys(featureAccessesData).map(
+        (featureKey) =>
+          [
+            featureKey as TFeatureKey,
+            featureAccessesData[featureKey] as FeatureAccess,
+          ] as const,
+      );
+      this._featureAccesses = new Map(entries);
     } catch (err) {
       throw new Error('Could not parse push event');
     }
@@ -266,18 +290,20 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     }
 
     try {
-      const featureAccesses: Record<string, FeatureAccess | null> = JSON.parse(
-        event.data,
-      );
-      Object.keys(featureAccesses).map((featureId) => {
-        if (featureAccesses[featureId] === null) {
+      const newFeatureAccessesData: Record<TFeatureKey, FeatureAccess | null> =
+        JSON.parse(event.data);
+      const newFeatureKeys = Object.keys(
+        newFeatureAccessesData,
+      ) as TFeatureKey[];
+      newFeatureKeys.forEach((featureId: TFeatureKey) => {
+        const featureAccess = newFeatureAccessesData[featureId];
+        if (featureAccess === null) {
           if (featureId in this._featureAccesses) {
-            delete this._featureAccesses[featureId];
+            this._featureAccesses.delete(featureId);
           }
-          return;
+        } else {
+          this._featureAccesses.set(featureId, featureAccess);
         }
-
-        this._featureAccesses[featureId] = featureAccesses[featureId]!;
       });
     } catch (err) {
       this._logger.error('Could not parse patch event');
