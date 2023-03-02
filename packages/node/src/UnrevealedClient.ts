@@ -95,8 +95,6 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   ) {
     await this._connectionPromise;
 
-    this.identify({ user, team }).catch(() => {});
-
     return this._isFeatureEnabledSync(featureKey, { user, team });
   }
 
@@ -105,8 +103,6 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     team,
   }: { user?: User; team?: Team } = {}): Promise<TFeatureKey[]> {
     await this._connectionPromise;
-
-    this.identify({ user, team }).catch(() => {});
 
     const featureKeys = Object.keys(this._featureAccesses) as TFeatureKey[];
     return featureKeys.filter((featureKey) =>
