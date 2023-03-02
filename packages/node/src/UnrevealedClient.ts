@@ -67,7 +67,6 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }
 
   async connect(): Promise<boolean> {
-    console.log('connect');
     if (this._isReady()) {
       return true;
     }
@@ -175,9 +174,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
       try {
         const eventSource = this._createEventSource();
 
-        eventSource.addEventListener('error', (event, ...args) => {
-          console.log('error', event, args);
-
+        eventSource.addEventListener('error', (event) => {
           if (this._readyState === ReadyState.CONNECTING) {
             if ('status' in event && event.status === 401) {
               reject(new UnauthorizedException());
@@ -195,7 +192,6 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
         });
 
         eventSource.addEventListener('put', async (event) => {
-          console.log('put', event);
           try {
             this._handlePut(event);
             resolve();
@@ -205,7 +201,6 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
         });
 
         eventSource.addEventListener('patch', (event) => {
-          console.log('patch', event);
           this._handlePatch(event);
         });
 
