@@ -1,6 +1,6 @@
 import EventSource from 'eventsource';
 import { UnauthorizedException } from './errors';
-import { Logger, UnrevealedLogger } from './Logger';
+import { DefaultLogger, UnrevealedLogger } from './Logger';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
 const TRACKING_API_URL = 'https://track.unrevealed.tech';
@@ -22,7 +22,7 @@ const RETRY_INTERVAL_MS = 2000;
 
 export interface UnrevealedClientOptions {
   apiKey: string;
-  logger?: Logger;
+  logger?: UnrevealedLogger;
   defaults?: Record<string, boolean>;
 }
 
@@ -54,7 +54,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   private readonly _apiKey: string;
   private readonly _apiUrl: string;
   private readonly _trackingUrl: string;
-  private readonly _logger: Logger;
+  private readonly _logger: UnrevealedLogger;
 
   constructor(options: UnrevealedClientOptions) {
     const { apiKey, apiUrl, trackingUrl, logger, defaults } =
@@ -62,7 +62,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     this._apiKey = apiKey;
     this._apiUrl = apiUrl || SSE_API_URL;
     this._trackingUrl = trackingUrl || TRACKING_API_URL;
-    this._logger = logger ?? new UnrevealedLogger();
+    this._logger = logger ?? new DefaultLogger();
 
     const defaultsEntries = defaults
       ? Object.keys(defaults).map(
@@ -145,6 +145,14 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     });
   }
 
+  private _log(message: string) {
+    this._logger.log(`unrevealed: ${message}`);
+  }
+
+  private _logError(message: string) {
+    this._logger.error(`unrevealed: ${message}`);
+  }
+
   private get _featureKeys(): TFeatureKey[] {
     return [
       ...new Set([...this._featureAccesses.keys(), ...this._defaults.keys()]),
@@ -161,15 +169,15 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     try {
       await this._connect();
       this._readyState = ReadyState.READY;
-      this._logger.log('Connection to Unrevealed established');
+      this._log('Connection established');
     } catch (err) {
       if (err instanceof UnauthorizedException) {
-        this._logger.error('Unauthorized, please check your API key');
+        this._logError('Unauthorized, please check your API key');
         return;
       }
 
-      this._logger.error(`Connection to Unrevealed failed: ${err}`);
-      this._logger.error(`Reconnecting...`);
+      this._logError(`Connection failed, retrying...`);
+      this._logError(`${err}`);
       return new Promise<void>((resolve) => {
         setTimeout(async () => {
           await this._connectRecursive(attempt + 1);
@@ -306,7 +314,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
         }
       });
     } catch (err) {
-      this._logger.error('Could not parse patch event');
+      this._logError('Could not parse patch event');
     }
   }
 }

@@ -1,3 +1,4 @@
+export { UnrevealedLogger } from './Logger';
 export {
   ReadyState,
   UnrevealedClient,

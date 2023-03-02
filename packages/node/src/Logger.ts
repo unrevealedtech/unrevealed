@@ -1,9 +1,9 @@
-export interface Logger {
+export interface UnrevealedLogger {
   log(message: string): void;
   error(message: string): void;
 }
 
-export class UnrevealedLogger implements Logger {
+export class DefaultLogger implements UnrevealedLogger {
   log(message: string) {
     console.log(`[INFO] unrevealed: ${message}`);
   }
