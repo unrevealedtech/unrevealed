@@ -56,22 +56,22 @@ export async function init() {
       return;
     }
 
-    const { productId, client, generatedFile } = await inquirer.prompt<{
+    const { productId, sdk, generatedFilename } = await inquirer.prompt<{
       productId: string;
-      client: 'react';
-      generatedFile: string;
+      sdk: 'react';
+      generatedFilename: string;
     }>([
       {
         name: 'productId',
         type: 'list',
-        message: 'Which project do you want to link?',
+        message: 'Which product do you want to link?',
         choices: products.map((product) => ({
           name: `${product.name} (${product.organization.name})`,
           value: product.id,
         })),
       },
       {
-        name: 'client',
+        name: 'sdk',
         type: 'list',
         message: 'Which SDK would you like to use for this project?',
         choices: [
@@ -79,16 +79,20 @@ export async function init() {
             name: 'React',
             value: 'react',
           },
+          {
+            name: 'Node.js',
+            value: 'node',
+          },
         ],
       },
       {
-        name: 'generatedFile',
+        name: 'generatedFilename',
         type: 'input',
         default: path.join('src', 'generated', 'unrevealed.ts'),
       },
     ]);
 
-    await writeConfig({ productId, client, generatedFile });
+    await writeConfig({ productId, sdk, generatedFilename });
 
     console.log(chalk.green('>>> Created unrevealed.config.json'));
   } catch (err) {
@@ -104,13 +108,13 @@ export async function init() {
 }
 
 async function writeConfig({
+  sdk,
   productId,
-  generatedFile,
-  client,
+  generatedFilename,
 }: {
+  sdk: 'react';
   productId: string;
-  generatedFile: string;
-  client: 'react';
+  generatedFilename: string;
 }) {
   const { stdout: projectDir } = await execa('npm', ['prefix']);
 
@@ -119,8 +123,11 @@ async function writeConfig({
     configFile,
     {
       productId,
-      generate: generatedFile,
-      client,
+      generates: {
+        [generatedFilename]: {
+          sdk,
+        },
+      },
     },
     { spaces: 2 },
   );
