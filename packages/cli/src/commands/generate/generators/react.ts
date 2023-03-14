@@ -15,7 +15,7 @@ export function generatorReact(product: Query['product']) {
 
   return `import { UnrevealedFeatureKey } from '@unrevealed/react';
 
-  declare module '@unrevealed/react' {
+declare module '@unrevealed/react' {
 ${indent(generateUnrevealedFeaturesInterface(sortedFeatures), 2)}
 
 ${indent(generateUserTraitsInterface(product.userTraits), 2)}
