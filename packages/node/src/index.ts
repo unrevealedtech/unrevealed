@@ -1,10 +1,5 @@
 export type { UnrevealedLogger } from './Logger';
-export type {
-  UnrevealedFeatureKey,
-  UnrevealedFeatures,
-  UnrevealedTeamTraits,
-  UnrevealedUserTraits,
-} from './types';
+export type { FeatureKey, Features, TeamTraits, UserTraits } from './types';
 export {
   UnrevealedClient,
   type ReadyState,

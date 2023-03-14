@@ -1,23 +1,17 @@
-export interface UnrevealedFeatures {}
+export interface Features {}
 
-export type UnrevealedFeatureKey = keyof UnrevealedFeatures extends never
-  ? string
-  : keyof UnrevealedFeatures;
+export type FeatureKey = keyof Features extends never ? string : keyof Features;
 
-export interface UnrevealedUserTraits {}
+export interface UserTraits {}
 
 export interface User {
   id: string;
-  traits: keyof UnrevealedUserTraits extends never
-    ? Record<string, unknown>
-    : UnrevealedUserTraits;
+  traits: keyof UserTraits extends never ? Record<string, unknown> : UserTraits;
 }
 
-export interface UnrevealedTeamTraits {}
+export interface TeamTraits {}
 
 export interface Team {
   id: string;
-  traits: keyof UnrevealedTeamTraits extends never
-    ? Record<string, unknown>
-    : UnrevealedTeamTraits;
+  traits: keyof TeamTraits extends never ? Record<string, unknown> : TeamTraits;
 }

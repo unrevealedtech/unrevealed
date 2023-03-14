@@ -1,7 +1,7 @@
 import EventSource from 'eventsource';
 import { UnauthorizedException } from './errors';
 import { DefaultLogger, UnrevealedLogger } from './Logger';
-import { Team, UnrevealedFeatureKey, User } from './types';
+import { FeatureKey, Team, User } from './types';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
 const TRACKING_API_URL = 'https://track.unrevealed.tech';
@@ -33,11 +33,10 @@ type AllUnrevealedClientOptions = UnrevealedClientOptions &
 
 export class UnrevealedClient {
   private _eventSource: EventSource | null = null;
-  private _featureAccesses: Map<UnrevealedFeatureKey, FeatureAccess> =
-    new Map();
+  private _featureAccesses: Map<FeatureKey, FeatureAccess> = new Map();
   private _readyState: ReadyState = 'UNINITIALIZED';
   private _connectionPromise: Promise<void> | null = null;
-  private readonly _defaults: Map<UnrevealedFeatureKey, boolean>;
+  private readonly _defaults: Map<FeatureKey, boolean>;
   private readonly _apiKey: string;
   private readonly _apiUrl: string;
   private readonly _trackingUrl: string;
@@ -54,7 +53,7 @@ export class UnrevealedClient {
     const defaultsEntries = defaults
       ? Object.keys(defaults).map(
           (featureKey) =>
-            [featureKey as UnrevealedFeatureKey, defaults[featureKey]] as const,
+            [featureKey as FeatureKey, defaults[featureKey]] as const,
         )
       : [];
     this._defaults = new Map(defaultsEntries);
@@ -87,7 +86,7 @@ export class UnrevealedClient {
   }
 
   async isFeatureEnabled(
-    featureKey: UnrevealedFeatureKey,
+    featureKey: FeatureKey,
     { user, team }: { user?: User; team?: Team } = {},
   ) {
     await this._connectionPromise;
@@ -98,7 +97,7 @@ export class UnrevealedClient {
   async getEnabledFeatures({
     user,
     team,
-  }: { user?: User; team?: Team } = {}): Promise<UnrevealedFeatureKey[]> {
+  }: { user?: User; team?: Team } = {}): Promise<FeatureKey[]> {
     await this._connectionPromise;
 
     return this._featureKeys.filter((featureKey) =>
@@ -139,7 +138,7 @@ export class UnrevealedClient {
     this._logger.error(`unrevealed: ${message}`);
   }
 
-  private get _featureKeys(): UnrevealedFeatureKey[] {
+  private get _featureKeys(): FeatureKey[] {
     return [
       ...new Set([...this._featureAccesses.keys(), ...this._defaults.keys()]),
     ];
@@ -218,7 +217,7 @@ export class UnrevealedClient {
   }
 
   private _isFeatureEnabledSync(
-    featureKey: UnrevealedFeatureKey,
+    featureKey: FeatureKey,
     { user, team }: { user?: User; team?: Team } = {},
   ): boolean {
     const featureAccess = this._featureAccesses.get(featureKey);
@@ -268,7 +267,7 @@ export class UnrevealedClient {
       const entries = Object.keys(featureAccessesData).map(
         (featureKey) =>
           [
-            featureKey as UnrevealedFeatureKey,
+            featureKey as FeatureKey,
             featureAccessesData[featureKey] as FeatureAccess,
           ] as const,
       );
@@ -284,14 +283,12 @@ export class UnrevealedClient {
     }
 
     try {
-      const newFeatureAccessesData: Record<
-        UnrevealedFeatureKey,
-        FeatureAccess | null
-      > = JSON.parse(event.data);
+      const newFeatureAccessesData: Record<FeatureKey, FeatureAccess | null> =
+        JSON.parse(event.data);
       const newFeatureKeys = Object.keys(
         newFeatureAccessesData,
-      ) as UnrevealedFeatureKey[];
-      newFeatureKeys.forEach((featureId: UnrevealedFeatureKey) => {
+      ) as FeatureKey[];
+      newFeatureKeys.forEach((featureId: FeatureKey) => {
         const featureAccess = newFeatureAccessesData[featureId];
         if (featureAccess === null) {
           if (featureId in this._featureAccesses) {
