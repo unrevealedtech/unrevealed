@@ -88,6 +88,7 @@ export async function init() {
       {
         name: 'generatedFilename',
         type: 'input',
+        message: 'Where do you the code to be generated?',
         default: path.join('src', 'generated', 'unrevealed.ts'),
       },
     ]);
