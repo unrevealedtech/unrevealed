@@ -1,6 +1,7 @@
 import EventSource from 'eventsource';
 import { UnauthorizedException } from './errors';
 import { DefaultLogger, UnrevealedLogger } from './Logger';
+import { Team, UnrevealedFeatureKey, User } from './types';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
 const TRACKING_API_URL = 'https://track.unrevealed.tech';
@@ -11,12 +12,7 @@ interface FeatureAccess {
   teamAccess: string[];
 }
 
-export enum ReadyState {
-  UNINITIALIZED,
-  CONNECTING,
-  READY,
-  CLOSED,
-}
+export type ReadyState = 'UNINITIALIZED' | 'CONNECTING' | 'READY' | 'CLOSED';
 
 const RETRY_INTERVAL_MS = 2000;
 
@@ -35,22 +31,13 @@ interface DevUnrevealedClientOptions {
 type AllUnrevealedClientOptions = UnrevealedClientOptions &
   DevUnrevealedClientOptions;
 
-interface User {
-  id: string;
-  traits?: Record<string, unknown>;
-}
-
-interface Team {
-  id: string;
-  traits?: Record<string, unknown>;
-}
-
-export class UnrevealedClient<TFeatureKey extends string = string> {
+export class UnrevealedClient {
   private _eventSource: EventSource | null = null;
-  private _featureAccesses: Map<TFeatureKey, FeatureAccess> = new Map();
-  private _readyState: ReadyState = ReadyState.UNINITIALIZED;
+  private _featureAccesses: Map<UnrevealedFeatureKey, FeatureAccess> =
+    new Map();
+  private _readyState: ReadyState = 'UNINITIALIZED';
   private _connectionPromise: Promise<void> | null = null;
-  private readonly _defaults: Map<TFeatureKey, boolean>;
+  private readonly _defaults: Map<UnrevealedFeatureKey, boolean>;
   private readonly _apiKey: string;
   private readonly _apiUrl: string;
   private readonly _trackingUrl: string;
@@ -67,7 +54,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     const defaultsEntries = defaults
       ? Object.keys(defaults).map(
           (featureKey) =>
-            [featureKey as TFeatureKey, defaults[featureKey]] as const,
+            [featureKey as UnrevealedFeatureKey, defaults[featureKey]] as const,
         )
       : [];
     this._defaults = new Map(defaultsEntries);
@@ -83,8 +70,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     }
 
     const isConnectableState =
-      this._readyState === ReadyState.UNINITIALIZED ||
-      this._readyState === ReadyState.CLOSED;
+      this._readyState === 'UNINITIALIZED' || this._readyState === 'CLOSED';
     if (isConnectableState) {
       this._connectionPromise = this._connectRecursive();
     }
@@ -96,12 +82,12 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
 
   close() {
     this._closeExistingEventSource();
-    this._readyState = ReadyState.CLOSED;
+    this._readyState = 'CLOSED';
     this._featureAccesses = new Map();
   }
 
   async isFeatureEnabled(
-    featureKey: TFeatureKey,
+    featureKey: UnrevealedFeatureKey,
     { user, team }: { user?: User; team?: Team } = {},
   ) {
     await this._connectionPromise;
@@ -112,7 +98,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   async getEnabledFeatures({
     user,
     team,
-  }: { user?: User; team?: Team } = {}): Promise<TFeatureKey[]> {
+  }: { user?: User; team?: Team } = {}): Promise<UnrevealedFeatureKey[]> {
     await this._connectionPromise;
 
     return this._featureKeys.filter((featureKey) =>
@@ -153,22 +139,22 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
     this._logger.error(`unrevealed: ${message}`);
   }
 
-  private get _featureKeys(): TFeatureKey[] {
+  private get _featureKeys(): UnrevealedFeatureKey[] {
     return [
       ...new Set([...this._featureAccesses.keys(), ...this._defaults.keys()]),
     ];
   }
 
   private _isReady() {
-    return this._readyState === ReadyState.READY;
+    return this._readyState === 'READY';
   }
 
   private async _connectRecursive(attempt: number = 1) {
-    this._readyState = ReadyState.CONNECTING;
+    this._readyState = 'CONNECTING';
 
     try {
       await this._connect();
-      this._readyState = ReadyState.READY;
+      this._readyState = 'READY';
       this._log('Connection established');
     } catch (err) {
       if (err instanceof UnauthorizedException) {
@@ -195,7 +181,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
         const eventSource = this._createEventSource();
 
         eventSource.addEventListener('error', (event) => {
-          if (this._readyState === ReadyState.CONNECTING) {
+          if (this._readyState === 'CONNECTING') {
             if ('status' in event && event.status === 401) {
               reject(new UnauthorizedException());
               return;
@@ -232,7 +218,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }
 
   private _isFeatureEnabledSync(
-    featureKey: TFeatureKey,
+    featureKey: UnrevealedFeatureKey,
     { user, team }: { user?: User; team?: Team } = {},
   ): boolean {
     const featureAccess = this._featureAccesses.get(featureKey);
@@ -266,14 +252,14 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }
 
   private _handleError(_event: MessageEvent) {
-    if (this._readyState === ReadyState.READY) {
+    if (this._readyState === 'READY') {
       this._connectRecursive();
       return;
     }
   }
 
   private _handlePut(event: MessageEvent) {
-    if (this._readyState !== ReadyState.CONNECTING) {
+    if (this._readyState !== 'CONNECTING') {
       return;
     }
 
@@ -282,7 +268,7 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
       const entries = Object.keys(featureAccessesData).map(
         (featureKey) =>
           [
-            featureKey as TFeatureKey,
+            featureKey as UnrevealedFeatureKey,
             featureAccessesData[featureKey] as FeatureAccess,
           ] as const,
       );
@@ -293,17 +279,19 @@ export class UnrevealedClient<TFeatureKey extends string = string> {
   }
 
   private _handlePatch(event: MessageEvent) {
-    if (this._readyState !== ReadyState.READY) {
+    if (this._readyState !== 'READY') {
       return;
     }
 
     try {
-      const newFeatureAccessesData: Record<TFeatureKey, FeatureAccess | null> =
-        JSON.parse(event.data);
+      const newFeatureAccessesData: Record<
+        UnrevealedFeatureKey,
+        FeatureAccess | null
+      > = JSON.parse(event.data);
       const newFeatureKeys = Object.keys(
         newFeatureAccessesData,
-      ) as TFeatureKey[];
-      newFeatureKeys.forEach((featureId: TFeatureKey) => {
+      ) as UnrevealedFeatureKey[];
+      newFeatureKeys.forEach((featureId: UnrevealedFeatureKey) => {
         const featureAccess = newFeatureAccessesData[featureId];
         if (featureAccess === null) {
           if (featureId in this._featureAccesses) {
