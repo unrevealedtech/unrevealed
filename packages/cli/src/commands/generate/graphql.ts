@@ -1,7 +1,9 @@
-import { gql } from 'graphql-request';
+import { gql, GraphQLClient } from 'graphql-request';
+import { API_URL } from '~/constants';
+import { logError } from '~/logger';
 import { DataType } from './dataType';
 
-export const QUERY = gql`
+const QUERY = gql`
   query Features($productId: ID!) {
     product(productId: $productId) {
       id
@@ -38,3 +40,21 @@ export type Query = {
     }>;
   };
 };
+
+export async function fetchProduct(productId: string, token: string) {
+  const graphqlClient = new GraphQLClient(API_URL, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  try {
+    const { product } = await graphqlClient.request<Query>(QUERY, {
+      productId,
+    });
+    return product;
+  } catch (err) {
+    logError(`Could not fetch product with id ${productId}`);
+    return null;
+  }
+}

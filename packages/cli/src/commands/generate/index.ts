@@ -3,13 +3,11 @@ import { z } from 'zod';
 
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
-import { GraphQLClient } from 'graphql-request';
 import { fromZodError } from 'zod-validation-error';
 import { readToken } from '~/auth';
-import { API_URL } from '~/constants';
 import { logError, logUnauthorized } from '~/logger';
 import { generatorReact } from './generators/react';
-import { QUERY, Query } from './graphql';
+import { fetchProduct, Query } from './graphql';
 
 type Sdk = 'react' | 'node';
 
@@ -38,15 +36,10 @@ export async function generate() {
 
   const { productId, generates } = config;
 
-  const graphqlClient = new GraphQLClient(API_URL, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const { product } = await graphqlClient.request<Query>(QUERY, {
-    productId,
-  });
+  const product = await fetchProduct(productId, token);
+  if (!product) {
+    return;
+  }
 
   const generateItems = Object.entries(generates);
 
