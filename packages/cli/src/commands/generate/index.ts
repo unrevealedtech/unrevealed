@@ -1,50 +1,17 @@
 import chalk from 'chalk';
+import { z } from 'zod';
+
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
-import { gql, GraphQLClient } from 'graphql-request';
-import { IndentationText, Project, WriterFunction, Writers } from 'ts-morph';
+import { GraphQLClient } from 'graphql-request';
+import { fromZodError } from 'zod-validation-error';
 import { readToken } from '~/auth';
 import { API_URL } from '~/constants';
 import { logError, logUnauthorized } from '~/logger';
-import { DataType, DATA_TYPE_MAP } from './dataType';
+import { generatorReact } from './generators/react';
+import { QUERY, Query } from './graphql';
 
-const QUERY = gql`
-  query Features($productId: ID!) {
-    product(productId: $productId) {
-      id
-      features() {
-        id
-        key
-      }
-      userTraits {
-        name
-        dataType
-      }
-      teamTraits {
-        name
-        dataType
-      }
-    }
-  }
-`;
-
-type Query = {
-  product: {
-    id: string;
-    features: Array<{
-      id: string;
-      key: string;
-    }>;
-    userTraits: Array<{
-      name: string;
-      dataType: DataType;
-    }>;
-    teamTraits: Array<{
-      name: string;
-      dataType: DataType;
-    }>;
-  };
-};
+type Sdk = 'react' | 'node';
 
 export async function generate() {
   const token = await readToken();
@@ -64,7 +31,12 @@ export async function generate() {
     return;
   }
 
-  const { productId, generate: generatedFile } = await fs.readJSON(configFile);
+  const config = await readConfig(configFile);
+  if (!config) {
+    return;
+  }
+
+  const { productId, generates } = config;
 
   const graphqlClient = new GraphQLClient(API_URL, {
     headers: {
@@ -76,137 +48,55 @@ export async function generate() {
     productId,
   });
 
-  const { features } = product;
+  const generateItems = Object.entries(generates);
 
-  const project = new Project({
-    manipulationSettings: {
-      indentationText: IndentationText.TwoSpaces,
-    },
-  });
+  for (const [filename, { sdk }] of generateItems) {
+    const generate = generators[sdk];
 
-  const source = project.createSourceFile(generatedFile, '', {
-    overwrite: true,
-  });
+    const code = generate(product);
 
-  source.addImportDeclaration({
-    moduleSpecifier: 'react',
-    namedImports: ['useCallback'],
-  });
-  source.addImportDeclaration({
-    moduleSpecifier: '@unrevealed/react',
-    namedImports: ['useUnrevealed'],
-  });
-
-  const featureKeys = features.map((feature) => `'${feature.key}'`);
-
-  let featureType: string | WriterFunction = 'never';
-  if (featureKeys.length == 1) {
-    featureType = featureKeys[0];
-  } else if (featureKeys.length > 1) {
-    const [feature1, feature2, ...restFeatures] = featureKeys;
-    featureType = Writers.unionType(feature1, feature2, ...restFeatures);
+    try {
+      await fs.writeFile(filename, code);
+    } catch (err) {
+      let message = `Error writing to file: ${filename}`;
+      if (err instanceof Error) {
+        message = `${message}\n${err.message}`;
+      }
+      logError(message);
+    }
   }
+}
 
-  source.addTypeAlias({
-    name: 'FeatureKey',
-    type: featureType,
-    isExported: true,
-  });
+const generators: Record<Sdk, (product: Query['product']) => string> = {
+  react: generatorReact,
+  node: () => '',
+};
 
-  source.addTypeAlias({
-    name: 'UserTraits',
-    type: Writers.objectType({
-      properties: product.userTraits.map((trait) => ({
-        name: trait.name,
-        type: DATA_TYPE_MAP[trait.dataType],
-      })),
+const configSchema = z.object({
+  productId: z.string(),
+  generates: z.record(
+    z.string(),
+    z.object({
+      sdk: z.union([z.literal('react'), z.literal('node')]),
     }),
-    isExported: true,
-  });
-  source.addTypeAlias({
-    name: 'User',
-    type: Writers.objectType({
-      properties: [
-        {
-          name: 'id',
-          type: 'string',
-        },
-        {
-          name: 'traits',
-          type: 'UserTraits',
-        },
-      ],
-    }),
-    isExported: true,
-  });
+  ),
+});
 
-  source.addTypeAlias({
-    name: 'TeamTraits',
-    type: Writers.objectType({
-      properties: product.teamTraits.map((trait) => ({
-        name: trait.name,
-        type: DATA_TYPE_MAP[trait.dataType],
-      })),
-    }),
-    isExported: true,
-  });
-  source.addTypeAlias({
-    name: 'Team',
-    type: Writers.objectType({
-      properties: [
-        {
-          name: 'id',
-          type: 'string',
-        },
-        {
-          name: 'traits',
-          type: 'TeamTraits',
-        },
-      ],
-    }),
-    isExported: true,
-  });
+async function readConfig(configFile: string) {
+  try {
+    const config: unknown = await fs.readJSON(configFile);
 
-  const useFeatureDeclaration = source.addFunction({
-    name: 'useFeature',
-    isExported: true,
-    statements: `const { features, loading, error } = useUnrevealed();
+    const parseRes = configSchema.safeParse(config);
+    if (!parseRes.success) {
+      const errorMessage = fromZodError(parseRes.error).message;
+      logError(`Error parsing ${configFile}\n\n>>> ${errorMessage}`);
+      return null;
+    }
 
-      return {
-        enabled: features.has(key),
-        loading,
-        error,
-      };`,
-  });
+    return parseRes.data;
+  } catch (err) {
+    logError(`Error parsing ${configFile}`);
 
-  useFeatureDeclaration.addParameter({
-    name: 'key',
-    type: 'FeatureKey',
-  });
-
-  source.addFunction({
-    name: 'useIdentify',
-    isExported: true,
-    statements: `const { identify: looseIdentify } = useUnrevealed();
-      const identify = useCallback(({ user, team }: { user: User | null; team?: Team | null }) => {
-        looseIdentify({ user, team })
-      }, [looseIdentify]);
-
-      return { identify };`,
-  });
-
-  features.forEach((feature) => {
-    source.addFunction({
-      name: `use${feature.key
-        .split('-')
-        .map((word) => word.replace(/(^[a-z])/, (group) => group.toUpperCase()))
-        .join('')}Feature`,
-      isExported: true,
-      statements: `return useFeature('${feature.key}');`,
-    });
-  });
-
-  source.formatText();
-
-  await source.save();
+    return null;
+  }
 }
