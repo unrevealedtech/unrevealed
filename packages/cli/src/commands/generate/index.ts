@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
+import path from 'path';
 import { fromZodError } from 'zod-validation-error';
 import { readToken } from '~/auth';
 import { logError, logSuccess, logUnauthorized } from '~/logger';
@@ -50,6 +51,7 @@ export async function generate() {
     const code = generate(product);
 
     try {
+      await fs.ensureDir(path.dirname(filename));
       await fs.writeFile(filename, code);
 
       logSuccess(`Generated types and flags at ${filename}`);
