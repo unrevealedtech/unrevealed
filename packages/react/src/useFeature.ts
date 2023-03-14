@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { UnrevealedContext } from './context';
-import { UnrevealedFeatureKey } from './types';
+import { FeatureKey } from './types';
 
 export interface UseFeatureResult {
   enabled: boolean;
@@ -8,7 +8,7 @@ export interface UseFeatureResult {
   error: string | null;
 }
 
-export function useFeature(featureKey: UnrevealedFeatureKey) {
+export function useFeature(featureKey: FeatureKey) {
   const { error, loading, activeFeatures } = useContext(UnrevealedContext);
 
   return {

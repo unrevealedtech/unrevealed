@@ -13,7 +13,7 @@ export function generatorReact(product: Query['product']) {
     return 0;
   });
 
-  return `import { UnrevealedFeatureKey } from '@unrevealed/react';
+  return `import { FeatureKey } from '@unrevealed/react';
 
 declare module '@unrevealed/react' {
 ${indent(generateUnrevealedFeaturesInterface(sortedFeatures), 2)}
@@ -30,7 +30,7 @@ ${generateFeatureKeys(sortedFeatures)}
 function generateUnrevealedFeaturesInterface(
   features: Query['product']['features'],
 ) {
-  return `interface UnrevealedFeatures {
+  return `interface Features {
 ${features
   .map((feature) => `  ${formatObjectKey(feature.key)}: boolean;`)
   .join(`\n`)}
@@ -60,7 +60,7 @@ ${traits
 }
 
 function generateFeatureKeys(features: Query['product']['features']) {
-  return `export const featureKeys: UnrevealedFeatureKey[] = [
+  return `export const featureKeys: FeatureKey[] = [
 ${features.map((feature) => `  '${feature.key}',`).join('\n')}
 ];`;
 }
