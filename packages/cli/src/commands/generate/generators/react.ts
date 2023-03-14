@@ -13,7 +13,7 @@ export function generatorReact(product: Query['product']) {
     return 0;
   });
 
-  return `import { FeatureKey } from '@unrevealed/react';
+  return `import type { FeatureKey } from '@unrevealed/react';
 
 declare module '@unrevealed/react' {
 ${indent(generateUnrevealedFeaturesInterface(sortedFeatures), 2)}

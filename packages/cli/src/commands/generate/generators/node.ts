@@ -13,7 +13,7 @@ export function generatorNode(product: Query['product']) {
     return 0;
   });
 
-  return `import { FeatureKey } from '@unrevealed/node';
+  return `import type { FeatureKey } from '@unrevealed/node';
 
 declare module '@unrevealed/node' {
 ${indent(generateUnrevealedFeaturesInterface(sortedFeatures), 2)}
