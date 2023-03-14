@@ -5,6 +5,7 @@ import ora from 'ora';
 import url from 'url';
 import { writeToken } from '~/auth';
 import { BASE_APP_URL } from '~/constants';
+import { logInfo, logSuccess } from '~/logger';
 
 const PORT = 9789;
 const HOST = 'http://127.0.0.1';
@@ -19,7 +20,7 @@ export async function login() {
 
   await writeToken(token);
 
-  console.log('>>> Successfully logged in!');
+  logSuccess('Successfully logged in!');
 }
 
 function getToken(): Promise<string> {
@@ -73,7 +74,7 @@ function getToken(): Promise<string> {
     });
 
     server.listen(PORT, () => {
-      console.log(`>>> Opening browser to ${AUTH_URL}`);
+      logInfo(`Opening browser to ${AUTH_URL}`);
       spinner.start();
 
       open(AUTH_URL);

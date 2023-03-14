@@ -5,7 +5,7 @@ import { findUp } from 'find-up';
 import fs from 'fs-extra';
 import { fromZodError } from 'zod-validation-error';
 import { readToken } from '~/auth';
-import { logError, logUnauthorized } from '~/logger';
+import { logError, logSuccess, logUnauthorized } from '~/logger';
 import { generatorReact } from './generators/react';
 import { fetchProduct, Query } from './graphql';
 
@@ -50,6 +50,8 @@ export async function generate() {
 
     try {
       await fs.writeFile(filename, code);
+
+      logSuccess(`Generated types and flags at ${filename}`);
     } catch (err) {
       let message = `Error writing to file: ${filename}`;
       if (err instanceof Error) {

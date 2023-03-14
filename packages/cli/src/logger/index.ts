@@ -1,10 +1,15 @@
 import chalk from 'chalk';
 
-export function logError(...texts: string[]) {
-  console.log(
-    chalk.bgRed.white.bold(' ERROR '),
-    ...texts.map((text) => chalk.red(text)),
-  );
+export function logError(...messages: string[]) {
+  console.error(chalk.bgRed.white.bold(' ERROR '), chalk.red(messages));
+}
+
+export function logSuccess(...messages: string[]) {
+  console.log(chalk.green('>>>', ...messages));
+}
+
+export function logInfo(...messages: string[]) {
+  console.log('>>>', messages);
 }
 
 export function logUnauthorized() {

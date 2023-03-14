@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { execa } from 'execa';
 import fs from 'fs-extra';
 import { ClientError, gql, GraphQLClient } from 'graphql-request';
@@ -6,7 +5,7 @@ import inquirer from 'inquirer';
 import path from 'path';
 import { readToken } from '~/auth';
 import { API_URL } from '~/constants';
-import { logError, logUnauthorized } from '~/logger';
+import { logError, logSuccess, logUnauthorized } from '~/logger';
 
 const PRODUCTS_QUERY = gql`
   query Products {
@@ -95,7 +94,7 @@ export async function init() {
 
     await writeConfig({ productId, sdk, generatedFilename });
 
-    console.log(chalk.green('>>> Created unrevealed.config.json'));
+    logSuccess('Created unrevealed.config.json');
   } catch (err) {
     if (err instanceof ClientError) {
       if (
