@@ -42,7 +42,9 @@ function generateUserTraitsInterface(traits: Query['product']['userTraits']) {
 ${traits
   .map(
     (trait) =>
-      `  ${formatObjectKey(trait.name)}: ${DATA_TYPE_MAP[trait.dataType]};`,
+      `  ${formatObjectKey(trait.name)}: ${
+        DATA_TYPE_MAP[trait.dataType]
+      } | null;`,
   )
   .join(`\n`)}
 }`;
@@ -53,7 +55,9 @@ function generateTeamTraitsInterface(traits: Query['product']['teamTraits']) {
 ${traits
   .map(
     (trait) =>
-      `  ${formatObjectKey(trait.name)}: ${DATA_TYPE_MAP[trait.dataType]};`,
+      `  ${formatObjectKey(trait.name)}: ${
+        DATA_TYPE_MAP[trait.dataType]
+      } | null;`,
   )
   .join(`\n`)}
 }`;
