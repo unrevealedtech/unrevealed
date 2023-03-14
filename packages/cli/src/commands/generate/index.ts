@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import { fromZodError } from 'zod-validation-error';
 import { readToken } from '~/auth';
 import { logError, logSuccess, logUnauthorized } from '~/logger';
+import { generatorNode } from './generators/node';
 import { generatorReact } from './generators/react';
 import { fetchProduct, Query } from './graphql';
 
@@ -64,7 +65,7 @@ export async function generate() {
 
 const generators: Record<Sdk, (product: Query['product']) => string> = {
   react: generatorReact,
-  node: () => '',
+  node: generatorNode,
 };
 
 const configSchema = z.object({
