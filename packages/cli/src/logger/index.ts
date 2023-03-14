@@ -9,7 +9,7 @@ export function logSuccess(...messages: string[]) {
 }
 
 export function logInfo(...messages: string[]) {
-  console.log('>>>', messages);
+  console.log('>>>', ...messages);
 }
 
 export function logUnauthorized() {
