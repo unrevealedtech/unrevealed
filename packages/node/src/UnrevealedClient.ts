@@ -85,13 +85,25 @@ export class UnrevealedClient {
     this._featureAccesses = new Map();
   }
 
-  async isFeatureEnabled(
+  isFeatureEnabled(
     featureKey: FeatureKey,
     { user, team }: { user?: User; team?: Team } = {},
   ) {
-    await this._connectionPromise;
+    const featureAccess = this._featureAccesses.get(featureKey);
 
-    return this._isFeatureEnabledSync(featureKey, { user, team });
+    if (!featureAccess) {
+      return this._defaults.get(featureKey) ?? false;
+    }
+    if (featureAccess.fullAccess) {
+      return true;
+    }
+    if (user && featureAccess.userAccess.indexOf(user.id) !== -1) {
+      return true;
+    }
+    if (team && featureAccess.teamAccess.indexOf(team.id) !== -1) {
+      return true;
+    }
+    return false;
   }
 
   async getEnabledFeatures({
@@ -101,7 +113,7 @@ export class UnrevealedClient {
     await this._connectionPromise;
 
     return this._featureKeys.filter((featureKey) =>
-      this._isFeatureEnabledSync(featureKey, { user, team }),
+      this.isFeatureEnabled(featureKey, { user, team }),
     );
   }
 
@@ -214,27 +226,6 @@ export class UnrevealedClient {
         reject(new Error(`Error initializing Unrevealed client: ${err}`));
       }
     });
-  }
-
-  private _isFeatureEnabledSync(
-    featureKey: FeatureKey,
-    { user, team }: { user?: User; team?: Team } = {},
-  ): boolean {
-    const featureAccess = this._featureAccesses.get(featureKey);
-
-    if (!featureAccess) {
-      return this._defaults.get(featureKey) ?? false;
-    }
-    if (featureAccess.fullAccess) {
-      return true;
-    }
-    if (user && featureAccess.userAccess.indexOf(user.id) !== -1) {
-      return true;
-    }
-    if (team && featureAccess.teamAccess.indexOf(team.id) !== -1) {
-      return true;
-    }
-    return false;
   }
 
   private _closeExistingEventSource() {
