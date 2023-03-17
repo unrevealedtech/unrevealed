@@ -18,13 +18,13 @@ npm install -D unrev
 
 ## Usage
 
-### Login to Unrevealed
+1. Login to Unrevealed
 
 ```
 unrev login
 ```
 
-### Initialize your config
+2. Initialize your config
 
 ```
 unrev init
@@ -32,7 +32,7 @@ unrev init
 
 This will ask you a few questions and generate `unrevealed.config.json` at the root of your project.
 
-### Generate
+3. Generate
 
 ```
 unrev generate
