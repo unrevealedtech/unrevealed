@@ -8,6 +8,8 @@ The Unrevealed CLI is a code generation tool designed to simplify the integratio
 - **Validation:** Never make typos anymore, or forget to pass the right attributes of your users and teams
 - **Maintenance:** Easily clean up your features by archiving them on Unrevealed then running the CLI to remove them from your codebase
 
+![Feature autocomplete example](resources/autocomplete-example.gif)
+
 ## Getting started
 
 Install the CLI. We recommend adding is as a `devDependency` of your project. If you have a monorepo, we also recommend installing it at the root if you're using it in multiple applications.
