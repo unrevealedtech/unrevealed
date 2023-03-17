@@ -106,12 +106,10 @@ export class UnrevealedClient {
     return false;
   }
 
-  async getEnabledFeatures({
+  getEnabledFeatures({
     user,
     team,
-  }: { user?: User; team?: Team } = {}): Promise<FeatureKey[]> {
-    await this._connectionPromise;
-
+  }: { user?: User; team?: Team } = {}): FeatureKey[] {
     return this._featureKeys.filter((featureKey) =>
       this.isFeatureEnabled(featureKey, { user, team }),
     );
