@@ -1,7 +1,5 @@
 # Unrevealed CLI
 
-## Introduction
-
 The Unrevealed CLI is a code generation tool designed to simplify the integration of [Unrevealed](https://unrevealed.tech) into your codebase. Using the CLI will allow you to automaticaly type the SDKs. This has multiple benefits:
 
 - **Autocomplete:** Don't open Unrevealed every time you need to know the key of a feature
