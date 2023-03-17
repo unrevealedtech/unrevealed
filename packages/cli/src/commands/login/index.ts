@@ -1,5 +1,4 @@
 import http from 'http';
-import { Socket } from 'net';
 import open from 'open';
 import ora from 'ora';
 import url from 'url';
@@ -25,7 +24,6 @@ export async function login() {
 
 function getToken(): Promise<string> {
   return new Promise((resolve) => {
-    const sockets = new Set<Socket>();
     const spinner = ora({
       text: 'Waiting for your authorization',
       spinner: 'bouncingBall',
@@ -55,23 +53,11 @@ function getToken(): Promise<string> {
       res.end();
 
       setImmediate(() => {
-        sockets.forEach((socket) => {
-          socket.destroy();
-          sockets.delete(socket);
-        });
-
         server.close();
       });
     };
 
     const server = http.createServer(requestListener);
-
-    server.on('connection', (socket) => {
-      sockets.add(socket);
-      server.once('close', () => {
-        sockets.delete(socket);
-      });
-    });
 
     server.listen(PORT, () => {
       logInfo(`Opening browser to ${AUTH_URL}`);
