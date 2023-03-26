@@ -10,6 +10,8 @@ const QUERY = gql`
       features(status: ACTIVE) {
         id
         key
+        name
+        description
       }
       userTraits {
         name
@@ -29,6 +31,8 @@ export type Query = {
     features: Array<{
       id: string;
       key: string;
+      name: string;
+      description: string;
     }>;
     userTraits: Array<{
       name: string;

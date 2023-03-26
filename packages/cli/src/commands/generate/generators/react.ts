@@ -1,6 +1,13 @@
-import { DATA_TYPE_MAP } from '../dataType';
 import { Query } from '../graphql';
-import { formatObjectKey, indent } from './utils';
+import {
+  generateFeatureInterface,
+  generateFeatureKeys,
+  generateFeatures,
+  generateTeamTraitsInterface,
+  generateUnrevealedFeaturesInterface,
+  generateUserTraitsInterface,
+  indent,
+} from './utils';
 
 export function generatorReact(product: Query['product']) {
   const sortedFeatures = product.features.sort((featureA, featureB) => {
@@ -23,48 +30,10 @@ ${indent(generateUserTraitsInterface(product.userTraits), 2)}
 ${indent(generateTeamTraitsInterface(product.teamTraits), 2)}
 }
 
+${generateFeatureInterface()}
+
+${generateFeatures(sortedFeatures)}
+
 ${generateFeatureKeys(sortedFeatures)}
 `;
-}
-
-function generateUnrevealedFeaturesInterface(
-  features: Query['product']['features'],
-) {
-  return `interface Features {
-${features
-  .map((feature) => `  ${formatObjectKey(feature.key)}: boolean;`)
-  .join(`\n`)}
-}`;
-}
-
-function generateUserTraitsInterface(traits: Query['product']['userTraits']) {
-  return `interface UserTraits {
-${traits
-  .map(
-    (trait) =>
-      `  ${formatObjectKey(trait.name)}: ${
-        DATA_TYPE_MAP[trait.dataType]
-      } | null;`,
-  )
-  .join(`\n`)}
-}`;
-}
-
-function generateTeamTraitsInterface(traits: Query['product']['teamTraits']) {
-  return `interface TeamTraits {
-${traits
-  .map(
-    (trait) =>
-      `  ${formatObjectKey(trait.name)}: ${
-        DATA_TYPE_MAP[trait.dataType]
-      } | null;`,
-  )
-  .join(`\n`)}
-}`;
-}
-
-function generateFeatureKeys(features: Query['product']['features']) {
-  return `export const featureKeys: FeatureKey[] = [
-${features.map((feature) => `  '${feature.key}',`).join('\n')}
-];`;
 }
