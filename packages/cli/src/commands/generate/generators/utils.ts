@@ -56,7 +56,7 @@ ${traits
 }
 
 export function generateFeatureInterface() {
-  return `interface Feature {
+  return `export interface Feature {
   name: string;
   description: string;
 }`;
