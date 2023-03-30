@@ -1,0 +1,51 @@
+.unrevealed-react-wrapper {
+  position: fixed;
+  z-index: 10000;
+  bottom: 32px;
+  right: 32px;
+  color: #228be6;
+  display: flex;
+  align-items: flex-end;
+  column-gap: 12px;
+}
+
+.unrevealed-react-button {
+  all: initial;
+  background: white;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.unrevealed-react-button:hover,
+.unrevealed-react-button.unrevealed-react-button__active {
+  background: #e7f5ff;
+}
+
+.unrevealed-react-list-wrapper {
+  padding: 6px;
+  background: #e7f5ff;
+  border-radius: 5px;
+}
+
+.unrevealed-react-list {
+  list-style: none;
+  padding: 12px;
+  margin: 0;
+}
+
+.unrevealed-react-list-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.unrevealed-react-list-item:hover {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
