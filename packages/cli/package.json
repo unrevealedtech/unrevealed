@@ -1,6 +1,6 @@
 {
   "name": "unrev",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Unrevealed",
   "scripts": {
     "publish-canary": "pnpm publish --tag canary",
