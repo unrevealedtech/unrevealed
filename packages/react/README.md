@@ -1,6 +1,6 @@
-# React SDK for Unrevealed
+# React SDK
 
-React sdk for [Unrevealed](https://unrevealed.tech/).
+Integrate Unrevealed in your front-end applications
 
 ## Getting Started
 
@@ -20,14 +20,16 @@ pnpm install @unrevealed/react
 
 ### Provider
 
-Add the provider at the root of your app. You can create a client key from your settings
+The first thing you need to do is add the Unrevealed provider at the root of your app. To generate a client key, go to the Api Keys menu in the app and create one. Select Client as the target SDK.
+
+You should use different API keys for different environments.
 
 ```tsx
 import { UnrevealedProvider } from '@unrevealed/react';
 
 function App() {
   return (
-    <UnrevealedProvider clientKey={yourClientKey}>
+    <UnrevealedProvider clientKey={yourApiKey}>
       <MainApp />
     </UnrevealedProvider>
   );
@@ -36,13 +38,13 @@ function App() {
 
 **Props**
 
-| Provider Prop | Type   | Note                                  | Default value |
-| ------------- | ------ | ------------------------------------- | ------------- |
-| `clientKey`\* | string | Generate the client key on Unrevealed | N/A           |
+| Provider Prop | Type   | Note                                               |
+| ------------- | ------ | -------------------------------------------------- |
+| `clientKey`\* | string | Generate an API key of type `Client` on Unrevealed |
 
 ### Identify
 
-You can use `identify` to set the current user and team. You'll want to call it whenever the current user or the current team changes
+You can use the `identify` function returned from the `useIdentify` hook to set the current user and team. Both are optional, but if your logged in user is part of an organization, or is currently in the context of a specific workspace of your app, we highly recommend you pass both.
 
 ```tsx
 import { useIdentify } from '@unrevealed/react';
@@ -75,14 +77,6 @@ function Login() {
 }
 ```
 
-**Reserved traits**
-
-The following traits of the `user` object have special meaning to Unrevealed:
-`email`, `name`, `firstName`, `lastName`: Unrevealed will make these properties searchable if they are valid strings
-
-The following traits of the `team` object have special meaning to Unrevealed:
-`name`: Unrevealed will make this property searchable if it's a valid string
-
 ### Checking if a feature is enabled
 
 ```ts
@@ -93,6 +87,7 @@ function Component() {
 
   if (loading) {
     // sdk is loading features
+    // you don't have to check this every time, but it can be useful if your users experience unwanted flickering in your app
   }
 
   if (enabled) {
@@ -103,11 +98,13 @@ function Component() {
 }
 ```
 
-- `loading` will be set to `true` while Unrevealed is fetching the enabled feature flags
+### Type safety
+
+You can make the `identify` function and `useFeature` hooks type safe by using the [code generator](/docs/code-generation), and defining the traits of your users and teams in the app.
 
 ### Feature Toggler Widget
 
-When using Unrevealed in development, you might need to see what your UI looks like when a feature is disabled. To avoid having to change your feature's state in the webapp, you can drop the feature toggler in your app.
+When using Unrevealed in development, you might need to check how the UI responds when a feature is disabled. You can do this without changing the feature's stage in the webapp, or changing your code, by using the Feature Toggler.
 
 ```tsx
 import { UnrevealedProvider, FeatureToggler } from '@unrevealed/react';
@@ -121,3 +118,11 @@ function App() {
   );
 }
 ```
+
+<figure>
+  <img
+    src="https://docs.unrevealed.tech/img/docs/sdk/feature-toggler.gif"
+    alt="Toggle feature on and off in development"
+  />
+  <figcaption>Toggle feature on and off in development</figcaption>
+</figure>

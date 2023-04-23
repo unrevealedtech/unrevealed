@@ -1,6 +1,8 @@
-# Node.js SDK for Unrevealed
+# Node SDK
 
-Node.js sdk for [Unrevealed](https://unrevealed.tech/).
+The Node SDK helps you integrate Unrevealed in a Node server.
+
+It's not suitable for serverless environments yet. If this is something you need, send us an email to thom@unrevealed.tech or open an issue and we'll prioritize it.
 
 ## Getting Started
 
@@ -44,7 +46,7 @@ const client = new UnrevealedClient({
 await client.connect();
 ```
 
-Call this once when initializing the server. This will create an EventSource object that receives the rules for your features. Rules are stored and evaluated locally
+Call this once when initializing your server. The SDK will open a connection to our servers that will receive the rules for your feature flags, and real-time updates when any of those rules change. Rules are stored and evaluated locally, so evaluating feature flags is fast and synchronous.
 
 #### `close`
 
@@ -57,7 +59,7 @@ Closes the connection with the Unrevealed API.
 #### `isFeatureEnabled`
 
 ```ts
-client.isFeatureEnabled('feature-b', { user: { id: 'user-id', traits: {...} }, user: { id: 'team-id', traits: {...} } });
+client.isFeatureEnabled('feature-b', { user: { id: 'user-id', traits: {...} }, team: { id: 'team-id', traits: {...} } });
 ```
 
 Returns `true` if a feature is enabled for a certain user in a certain team, `false` otherwise.
@@ -71,7 +73,7 @@ Returns `true` if a feature is enabled for a certain user in a certain team, `fa
 #### `getEnabledFeatures`
 
 ```ts
-client.getEnabledFeatures({ user: { id: 'user-id', traits: {...} }, user: { id: 'team-id', traits: {...} } });
+client.getEnabledFeatures({ user: { id: 'user-id', traits: {...} }, team: { id: 'team-id', traits: {...} } });
 ```
 
 Returns an array of the keys of all the features enabled for a certain user in a certain team.
@@ -84,7 +86,11 @@ Returns an array of the keys of all the features enabled for a certain user in a
 #### identify
 
 ```ts
-await client.identify({ user: { id: 'user-id', traits: {...} }, user: { id: 'team-id', traits: {...} } });
+await client.identify({ user: { id: 'user-id', traits: {...} }, team: { id: 'team-id', traits: {...} } });
 ```
 
 Identifies a user and its current team. This will make the user and its team show up in the Unrevealed app, allowing you to select them for a beta for example.
+
+### Type safety
+
+You can make the `identify` and `isFeatureEnabled` functions type safe by using the [code generator](/packages/cli), and defining the traits of your users and teams in the app.

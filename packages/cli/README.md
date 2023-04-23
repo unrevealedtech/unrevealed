@@ -12,7 +12,7 @@ The Unrevealed CLI is a code generation tool designed to simplify the integratio
 
 Install the CLI. We recommend adding is as a `devDependency` of your project. If you have a monorepo, we also recommend installing it at the root if you're using it in multiple applications.
 
-```
+```bash
 npm install -D unrev
 ```
 
@@ -20,13 +20,13 @@ npm install -D unrev
 
 1. Login to Unrevealed
 
-```
+```bash
 unrev login
 ```
 
 2. Initialize your config
 
-```
+```bash
 unrev init
 ```
 
@@ -34,7 +34,7 @@ This will ask you a few questions and generate `unrevealed.config.json` at the r
 
 3. Generate
 
-```
+```bash
 unrev generate
 ```
 
@@ -44,7 +44,7 @@ This command will generate types for the target SDKs, based on `unrevealed.confi
 
 The unrevealed config file is used by the CLI and the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=unrevealed.unrevealed-vscode) to generate code and give you context about your features. Here's an example of config file:
 
-```
+```json
 {
   "productId": "YOUR_PRODUCT_ID",
   "generates": {
