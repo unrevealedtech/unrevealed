@@ -15,7 +15,7 @@
 
 <br />
 
-<div align="center"><strong>100x your release process</strong><br>A feature management solution solves real life problems for developers
+<div align="center"><strong>100x your release process</strong><br>A feature management solution that solves real life problems for developers
 
 <br />
 
