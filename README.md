@@ -2,7 +2,7 @@
 
 <div align="center" style="margin: 30px;">
 <a href="https://unrevealed.tech">
-  <img src="https://raw.githubusercontent.com/unrevealedtech/unrevealed/main/assets/logo.png"   style="width:250px;" align="center" />
+  <img src="https://raw.githubusercontent.com/unrevealedtech/unrevealed/main/assets/monogram.png"   style="width:300px; border-radius: 50%" align="center" />
 </a>
 <br />
 <br />
