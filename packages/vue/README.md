@@ -79,7 +79,7 @@ const feature = useFeature('feature-key');
 
 <template>
   <div v-if="feature.enabled">Feature is enabled</div>
-  <div v-else="feature.enabled">Feature is diabled</div>
+  <div v-else="feature.enabled">Feature is disabled</div>
 </template>
 ```
 
