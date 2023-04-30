@@ -34,7 +34,7 @@ useUnrevealedProvider(yourApiKey);
 
 ### Identify
 
-You can use the `identify` function returned from the `useIdentify` hook to set the current user and team. Both are optional, but if your logged in user is part of an organization, or is currently in the context of a specific workspace of your app, we highly recommend you pass both.
+You can use the `identify` function returned from `useIdentify` to set the current user and team. Both are optional, but if your logged in user is part of an organization, or is currently in the context of a specific workspace of your app, we highly recommend you pass both.
 
 ```vue
 <script setup lang>
@@ -79,7 +79,7 @@ const feature = useFeature('feature-key');
 
 <template>
   <div v-if="feature.enabled">Feature is enabled</div>
-  <div v-else="feature.enabled">Feature is disabled</div>
+  <div v-else>Feature is disabled</div>
 </template>
 ```
 
