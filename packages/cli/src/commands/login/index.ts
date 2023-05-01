@@ -50,9 +50,8 @@ function getToken(): Promise<string> {
         Location: SUCCESS_URL,
       });
 
-      res.end();
-
-      setImmediate(() => {
+      res.end(() => {
+        server.closeAllConnections();
         server.close();
       });
     };
