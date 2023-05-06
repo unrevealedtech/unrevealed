@@ -6,7 +6,7 @@ export interface UnrevealedPluginOptions {
   clientKey: string;
 }
 
-export const unrevealedPlugin: Plugin<UnrevealedPluginOptions[]> = {
+export const UnrevealedPlugin: Plugin<UnrevealedPluginOptions[]> = {
   install(app, { clientKey }) {
     const features = ref<Set<FeatureKey>>(new Set());
 
