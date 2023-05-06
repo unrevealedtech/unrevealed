@@ -40,6 +40,7 @@ import { useIdentify } from '@unrevealed/vue';
 
 const { identify } = useIdentify();
 
+// Optional, if you need to load features for logged out users
 identify({ user: null });
 
 const login = () => {
