@@ -23,19 +23,19 @@ export function generator(packageName: string) {
 
     return `import type { FeatureKey } from '${packageName}';
   
-  declare module '${packageName}' {
-  ${indent(generateUnrevealedFeaturesInterface(sortedFeatures), 2)}
+declare module '${packageName}' {
+${indent(generateUnrevealedFeaturesInterface(sortedFeatures), 2)}
+
+${indent(generateUserTraitsInterface(product.userTraits), 2)}
+
+${indent(generateTeamTraitsInterface(product.teamTraits), 2)}
+}
   
-  ${indent(generateUserTraitsInterface(product.userTraits), 2)}
-  
-  ${indent(generateTeamTraitsInterface(product.teamTraits), 2)}
-  }
-  
-  ${generateFeatureInterface()}
-  
-  ${generateFeatures(sortedFeatures)}
-  
-  ${generateFeatureKeys(sortedFeatures)}
-  `;
+${generateFeatureInterface()}
+
+${generateFeatures(sortedFeatures)}
+
+${generateFeatureKeys(sortedFeatures)}
+`;
   };
 }
