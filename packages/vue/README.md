@@ -35,7 +35,7 @@ app.use(UnrevealedPlugin, { clientKey: yourClientKey });
 You can use the `identify` function returned from `useIdentify` to set the current user and team. Both are optional, but if your logged in user is part of an organization, or is currently in the context of a specific workspace of your app, we highly recommend you pass both.
 
 ```vue
-<script setup lang>
+<script setup lang="ts">
 import { useIdentify } from '@unrevealed/vue';
 
 const { identify } = useIdentify();
