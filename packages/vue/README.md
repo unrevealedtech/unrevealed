@@ -18,18 +18,16 @@ pnpm install @unrevealed/vue
 
 ## Usage
 
-### Provider
+### Plugin
 
-The first thing you need to do is add the Unrevealed provider at the root of your app. To generate an api key, go to the Api Keys menu in the app and create one. Select Client as the target SDK.
+Install the Unrevealed plugin to get started. To generate an client api key, go to the Api Keys menu in the app and create one. Select Client as the target SDK.
 
-You should use different API keys for different environments.
+You should use different api keys for different environments.
 
-```vue
-<script setup>
-import { useUnrevealedProvider } from '@unrevealed/vue';
+```ts
+import { UnrevealedPlugin } from '@unrevealed/vue';
 
-useUnrevealedProvider(yourApiKey);
-</script>
+app.use(UnrevealedPlugin, { clientKey: yourClientKey });
 ```
 
 ### Identify
@@ -42,6 +40,7 @@ import { useIdentify } from '@unrevealed/vue';
 
 const { identify } = useIdentify();
 
+// Optional, if you need to load features for logged out users
 identify({ user: null });
 
 const login = () => {
