@@ -35,6 +35,8 @@ export function useIdentify() {
     user: User | null;
     team?: Team | null;
   }) => {
+    console.log('identify');
+
     const trackUserAndTeam = async () => {
       if (user) {
         await track('user', { userId: user.id, traits: user.traits });
