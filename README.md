@@ -26,6 +26,7 @@
 **In this repository**:
 
 - [`react`](/packages/react/): SDK for React
+- [`vue`](/packages/vue/): SDK for Vue 3
 - [`node`](/packages/node/): SDK for NodeJS
 - [`cli`](/packages/cli/): Code generator
 
