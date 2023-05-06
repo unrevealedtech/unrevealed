@@ -7,11 +7,11 @@ import path from 'path';
 import { fromZodError } from 'zod-validation-error';
 import { readToken } from '~/auth';
 import { logError, logSuccess, logUnauthorized } from '~/logger';
-import { generatorNode } from './generators/node';
-import { generatorReact } from './generators/react';
+import { generator } from './generators/generator';
+
 import { fetchProduct, Query } from './graphql';
 
-type Sdk = 'react' | 'node';
+type Sdk = 'react' | 'node' | 'vue' | 'js';
 
 export async function generate() {
   const token = await readToken();
@@ -32,6 +32,7 @@ export async function generate() {
   }
 
   const config = await readConfig(configFile);
+
   if (!config) {
     return;
   }
@@ -39,6 +40,7 @@ export async function generate() {
   const { productId, generates } = config;
 
   const product = await fetchProduct(productId, token);
+
   if (!product) {
     return;
   }
@@ -66,8 +68,10 @@ export async function generate() {
 }
 
 const generators: Record<Sdk, (product: Query['product']) => string> = {
-  react: generatorReact,
-  node: generatorNode,
+  react: generator('@unrevealed/react'),
+  node: generator('@unrevealed/node'),
+  vue: generator('@unrevealed/vue'),
+  js: generator('@unrevealed/js'),
 };
 
 const configSchema = z.object({
@@ -75,7 +79,12 @@ const configSchema = z.object({
   generates: z.record(
     z.string(),
     z.object({
-      sdk: z.union([z.literal('react'), z.literal('node')]),
+      sdk: z.union([
+        z.literal('react'),
+        z.literal('node'),
+        z.literal('vue'),
+        z.literal('js'),
+      ]),
     }),
   ),
 });

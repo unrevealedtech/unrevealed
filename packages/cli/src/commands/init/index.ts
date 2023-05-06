@@ -79,8 +79,16 @@ export async function init() {
             value: 'react',
           },
           {
-            name: 'Node.js',
+            name: 'Vue',
+            value: 'vue',
+          },
+          {
+            name: 'Node',
             value: 'node',
+          },
+          {
+            name: 'JavaScript (browser)',
+            value: 'js',
           },
         ],
       },
@@ -112,7 +120,7 @@ async function writeConfig({
   productId,
   generatedFilename,
 }: {
-  sdk: 'react';
+  sdk: 'react' | 'vue' | 'node' | 'js';
   productId: string;
   generatedFilename: string;
 }) {
