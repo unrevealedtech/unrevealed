@@ -28,6 +28,7 @@
 - [`react`](/packages/react/): SDK for React
 - [`vue`](/packages/vue/): SDK for Vue 3
 - [`node`](/packages/node/): SDK for NodeJS
+- [`js`](/packages/js/): SDK for JavaScript in browsers
 - [`cli`](/packages/cli/): Code generator
 
 ## What is Unrevealed?
