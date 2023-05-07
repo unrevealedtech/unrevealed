@@ -98,7 +98,7 @@ export class UnrevealedClient {
 
   private async _identify(type: 'user' | 'team', body: unknown) {
     try {
-      await fetch(`${TRACKING_URL}/identify-${type}`, {
+      const response = await fetch(`${TRACKING_URL}/identify-${type}`, {
         method: 'post',
         headers: {
           'Client-Key': this.clientKey,
@@ -106,6 +106,11 @@ export class UnrevealedClient {
         },
         body: serializeBody(body),
       });
+      if (response.status < 300) {
+        return;
+      }
+
+      throw new Error(`Error identifying user: ${response.statusText}`);
     } catch (err) {
       this.broadcastError(err);
     }
