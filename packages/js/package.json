@@ -1,0 +1,45 @@
+{
+  "name": "@unrevealed/js",
+  "version": "0.0.1",
+  "description": "Unrevealed SDK for JavaScript",
+  "main": "dist/main.js",
+  "scripts": {
+    "publish-canary": "pnpm publish --tag canary",
+    "publish-latest": "pnpm publish --tag latest",
+    "build": "rollup -c rollup.config.js",
+    "prepack": "pnpm run build",
+    "lint": "pnpm eslint src/"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unrevealedtech/unrevealed.git"
+  },
+  "author": "Unrevealed",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/unrevealedtech/unrevealed/issues"
+  },
+  "homepage": "https://docs.unrevealed.tech/docs/js",
+  "keywords": [
+    "unrevealed",
+    "javascript",
+    "feature flag",
+    "feature toggle",
+    "feature switch",
+    "release"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "^8.24.0",
+    "prettier": "^2.7.1",
+    "rollup": "^2.79.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.8.3"
+  }
+}
