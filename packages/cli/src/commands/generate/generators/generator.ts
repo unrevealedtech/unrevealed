@@ -30,7 +30,7 @@ ${indent(generateUserTraitsInterface(product.userTraits), 2)}
 
 ${indent(generateTeamTraitsInterface(product.teamTraits), 2)}
 }
-  
+
 ${generateFeatureInterface()}
 
 ${generateFeatures(sortedFeatures)}
