@@ -22,7 +22,7 @@ export function generator(packageName: string) {
     });
 
     return `import type { FeatureKey } from '${packageName}';
-  
+
 declare module '${packageName}' {
 ${indent(generateUnrevealedFeaturesInterface(sortedFeatures), 2)}
 
