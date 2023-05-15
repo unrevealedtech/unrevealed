@@ -51,7 +51,10 @@ function getToken(): Promise<string> {
       });
 
       res.end(() => {
-        server.closeAllConnections();
+        if (server.closeAllConnections) {
+          server.closeAllConnections();
+        }
+
         server.close();
       });
     };
