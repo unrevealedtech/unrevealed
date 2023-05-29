@@ -1,5 +1,6 @@
 import EventSource from 'eventsource';
 import { UnauthorizedException } from './errors';
+import { getFetch } from './fetch';
 import { DefaultLogger, UnrevealedLogger } from './Logger';
 import { FeatureKey, Team, User } from './types';
 
@@ -130,6 +131,8 @@ export class UnrevealedClient {
   }
 
   async _track(type: 'user' | 'team', body: unknown) {
+    const fetch = getFetch();
+
     await fetch(`${this._trackingUrl}/identify-${type}`, {
       method: 'post',
       headers: {
