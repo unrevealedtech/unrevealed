@@ -1,6 +1,6 @@
 {
   "name": "@unrevealed/node",
-  "version": "0.1.1",
+  "version": "0.2.0-rc.1",
   "description": "Unrevealed SDK for Node",
   "main": "./lib/index.js",
   "types": "./lib/types/index.d.ts",
