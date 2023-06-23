@@ -1,4 +1,6 @@
+import crypto from 'crypto';
 import EventSource from 'eventsource';
+import { MAX_SHA1 } from './constants';
 import { UnauthorizedException } from './errors';
 import { getFetch } from './fetch';
 import { DefaultLogger, UnrevealedLogger } from './Logger';
@@ -11,6 +13,8 @@ interface FeatureAccess {
   fullAccess: boolean;
   userAccess: string[];
   teamAccess: string[];
+  userPercentageAccess: number;
+  teamPercentageAccess: number;
 }
 
 export type ReadyState = 'UNINITIALIZED' | 'CONNECTING' | 'READY' | 'CLOSED';
@@ -104,6 +108,23 @@ export class UnrevealedClient {
     if (team && featureAccess.teamAccess.indexOf(team.id) !== -1) {
       return true;
     }
+    if (
+      user &&
+      featureAccess.userPercentageAccess > 0 &&
+      this._normalizeKey(`${featureKey}-${user.id}`) <
+        featureAccess.userPercentageAccess / 100
+    ) {
+      return true;
+    }
+    if (
+      team &&
+      featureAccess.teamPercentageAccess > 0 &&
+      this._normalizeKey(`${featureKey}-${team.id}`) <
+        featureAccess.teamPercentageAccess / 100
+    ) {
+      return true;
+    }
+
     return false;
   }
 
@@ -130,7 +151,14 @@ export class UnrevealedClient {
     }
   }
 
-  async _track(type: 'user' | 'team', body: unknown) {
+  private _normalizeKey(key: string) {
+    const hash = crypto.createHash('sha1');
+    hash.update(key);
+    const hashHex = hash.digest('hex');
+    return Number(BigInt(`0x${hashHex}`)) / MAX_SHA1;
+  }
+
+  private async _track(type: 'user' | 'team', body: unknown) {
     const fetch = getFetch();
 
     await fetch(`${this._trackingUrl}/identify-${type}`, {
