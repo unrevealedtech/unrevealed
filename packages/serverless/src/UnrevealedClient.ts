@@ -78,14 +78,20 @@ export class UnrevealedClient {
   private async track(type: 'user' | 'team', body: unknown) {
     const fetch = getFetch();
 
-    await fetch(`${this.trackingApiUrl}/identify-${type}`, {
-      method: 'post',
-      headers: {
-        'Client-Key': this.apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    try {
+      await fetch(`${this.trackingApiUrl}/identify-${type}`, {
+        method: 'post',
+        headers: {
+          'Client-Key': this.apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
+    }
   }
 
   private _isFeatureEnabled(
@@ -139,7 +145,7 @@ export class UnrevealedClient {
 
     if (response.status === 400) {
       const { error } = await response.json();
-      throw new Error(error);
+      console.error(error);
     }
     const { rules }: { rules: Record<FeatureKey, FeatureAccess> } =
       await response.json();
