@@ -2,7 +2,7 @@
 
 The Node SDK helps you integrate Unrevealed in a Node server.
 
-It's not suitable for serverless environments yet. If this is something you need, send us an email to thom@unrevealed.tech or open an issue and we'll prioritize it.
+For Node.js in a serverless environment, check the [serverless](/packages/serverless) SDK instead.
 
 ## Getting Started
 
