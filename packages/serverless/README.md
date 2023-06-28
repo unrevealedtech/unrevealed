@@ -1,6 +1,6 @@
 # Unrevealed Serverless SDK
 
-The serverless SDK help you integrate [Unrevealed](https://unrevealed.tech) in your serverless APIs in Node
+The serverless SDK helps you integrate [Unrevealed](https://unrevealed.tech) in your serverless applications written in Node.js
 
 ## Getting Started
 
@@ -34,11 +34,13 @@ const client = new UnrevealedClient({
 | `apiKey`\*  | `string`             | Generate a `Serverless` API key on Unrevealed                                     | n/a     |
 | `fetchMode` | `'lazy'  \| 'eager'` | Define if the SDK should load rules eagerly on when checking a feature flag first | `lazy`  |
 
-To generate an api key, go to the Api Keys menu in the app and create one with the target `Serverless`.
+To generate an api key, go to the Api Keys menu in the app and create one with the target `Serverless`. This is important as `Serverless` api keys have different permissions from `Client` and `Server` ones.
 
-The client works by first fetching the rules of your features, then it computes whether a feature is enabled locally. When `fetchMode` is `eager`, the client will start loading the rules as soon as it's created. If it's `lazy`, it will only fetch them the first time you call `isFeatureEnabled` or `getEnabledFeatures`.
+The api key determines which environment you're in, so make sure you use a different one for each of them.
 
-The API that the client calls to get the rules runs on the edge, so the latency is maximally reduced wherever your code is running.
+The client works by first fetching the rules of your features. It then computes whether a feature is enabled or not locally. When `fetchMode` is `eager`, the client will start loading the rules as soon as it's created. If it's `lazy`, it will only fetch them the first time you call `isFeatureEnabled` or `getEnabledFeatures`.
+
+The API that the client calls to get the rules runs on the edge, so the latency is minimal wherever your code is running.
 
 #### `isFeatureEnabled`
 
@@ -59,7 +61,7 @@ await client.isFeatureEnabled('feature-key', {
 });
 ```
 
-Returns a `Promise<boolean>` that resolves to whether a feature is enabled to a user. If the rules haven't finished loading yet, it first waits for them. Otherwise it simply does the computation locally, without any api calls.
+Returns a `Promise<boolean>` that resolves to whether a feature is enabled to a user. If the rules haven't finished loading yet, it first waits for them. Otherwise, it simply does the computation locally, without any new api call.
 
 | Parameter      | Type                             | Note                                     |
 | -------------- | -------------------------------- | ---------------------------------------- |
@@ -86,7 +88,7 @@ await client.getEnabledFeatures({
 });
 ```
 
-Returns a `Promise<string[]>` of the feature that are enabled to a user. This also waits for the rules to be done loading.
+Returns a `Promise<string[]>` of the feature that are enabled to a user. It also waits for the rules to be done loading.
 
 | Parameter      | Type                             | Note             |
 | -------------- | -------------------------------- | ---------------- |
