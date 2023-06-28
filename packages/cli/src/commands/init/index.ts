@@ -88,7 +88,7 @@ export async function init() {
           },
           {
             name: 'Node (serverless)',
-            value: 'node',
+            value: 'serverless',
           },
           {
             name: 'JavaScript (browser)',
