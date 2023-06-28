@@ -34,31 +34,32 @@ const client = new UnrevealedClient({
 | `apiKey`\*  | `string`             | Generate a `Serverless` API key on Unrevealed                                     | n/a     |
 | `fetchMode` | `'lazy'  \| 'eager'` | Define if the SDK should load rules eagerly on when checking a feature flag first | `lazy`  |
 
-#### `fetchRules`
+To generate an api key, go to the Api Keys menu in the app and create one with the target `Serverless`.
 
-```ts
-await client.fetchRules();
-```
+The client works by first fetching the rules of your features, then it computes whether a feature is enabled locally. When `fetchMode` is `eager`, the client will start loading the rules as soon as it's created. If it's `lazy`, it will only fetch them the first time you call `isFeatureEnabled` or `getEnabledFeatures`.
 
-Fetch the rules they were not already loaded
-
-Call this once when initializing your server. The SDK will open a connection to our servers that will receive the rules for your feature flags, and real-time updates when any of those rules change. Rules are stored and evaluated locally, so evaluating feature flags is fast and synchronous.
-
-#### `close`
-
-```ts
-client.close();
-```
-
-Closes the connection with the Unrevealed API.
+The API that the client calls to get the rules runs on the edge, so the latency is maximally reduced wherever your code is running.
 
 #### `isFeatureEnabled`
 
 ```ts
-client.isFeatureEnabled('feature-b', { user: { id: 'user-id', traits: {...} }, team: { id: 'team-id', traits: {...} } });
+await client.isFeatureEnabled('feature-key', {
+  user: {
+    id: 'user-id',
+    traits: {
+      email: 'john@doe.com',
+    },
+  },
+  team: {
+    id: 'team-id',
+    traits: {
+      name: 'Acme',
+    },
+  },
+});
 ```
 
-Returns `true` if a feature is enabled for a certain user in a certain team, `false` otherwise.
+Returns a `Promise<boolean>` that resolves to whether a feature is enabled to a user. If the rules haven't finished loading yet, it first waits for them. Otherwise it simply does the computation locally, without any api calls.
 
 | Parameter      | Type                             | Note                                     |
 | -------------- | -------------------------------- | ---------------------------------------- |
@@ -69,10 +70,23 @@ Returns `true` if a feature is enabled for a certain user in a certain team, `fa
 #### `getEnabledFeatures`
 
 ```ts
-client.getEnabledFeatures({ user: { id: 'user-id', traits: {...} }, team: { id: 'team-id', traits: {...} } });
+await client.getEnabledFeatures({
+  user: {
+    id: 'user-id',
+    traits: {
+      email: 'john@doe.com',
+    },
+  },
+  team: {
+    id: 'team-id',
+    traits: {
+      name: 'Acme',
+    },
+  },
+});
 ```
 
-Returns an array of the keys of all the features enabled for a certain user in a certain team.
+Returns a `Promise<string[]>` of the feature that are enabled to a user. This also waits for the rules to be done loading.
 
 | Parameter      | Type                             | Note             |
 | -------------- | -------------------------------- | ---------------- |
@@ -89,4 +103,4 @@ Identifies a user and its current team. This will make the user and its team sho
 
 ### Type safety
 
-You can make the `identify` and `isFeatureEnabled` functions type safe by using the [code generator](/packages/cli), and defining the traits of your users and teams in the app.
+You can make the `identify`, `isFeatureEnabled` and `getEnabledFeatures` functions type safe by using the [code generator](/packages/cli), and defining the traits of your users and teams in the app.
