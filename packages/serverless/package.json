@@ -1,6 +1,6 @@
 {
   "name": "@unrevealed/serverless",
-  "version": "0.0.1-rc.1",
+  "version": "0.0.1",
   "description": "Unrevealed SDK for serverless deployments",
   "main": "./lib/index.js",
   "types": "./lib/types/index.d.ts",
