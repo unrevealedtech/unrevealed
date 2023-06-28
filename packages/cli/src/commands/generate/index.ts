@@ -85,6 +85,7 @@ const configSchema = z.object({
         z.literal('node'),
         z.literal('vue'),
         z.literal('js'),
+        z.literal('serverless'),
       ]),
     }),
   ),
