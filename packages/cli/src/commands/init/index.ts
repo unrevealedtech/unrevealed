@@ -83,7 +83,11 @@ export async function init() {
             value: 'vue',
           },
           {
-            name: 'Node',
+            name: 'Node (server)',
+            value: 'node',
+          },
+          {
+            name: 'Node (serverless)',
             value: 'node',
           },
           {
@@ -120,7 +124,7 @@ async function writeConfig({
   productId,
   generatedFilename,
 }: {
-  sdk: 'react' | 'vue' | 'node' | 'js';
+  sdk: 'react' | 'vue' | 'node' | 'js' | 'serverless';
   productId: string;
   generatedFilename: string;
 }) {

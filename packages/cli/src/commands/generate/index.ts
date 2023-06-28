@@ -11,7 +11,7 @@ import { generator } from './generators/generator';
 
 import { fetchProduct, Query } from './graphql';
 
-type Sdk = 'react' | 'node' | 'vue' | 'js';
+type Sdk = 'react' | 'node' | 'vue' | 'js' | 'serverless';
 
 export async function generate() {
   const token = await readToken();
@@ -72,6 +72,7 @@ const generators: Record<Sdk, (product: Query['product']) => string> = {
   node: generator('@unrevealed/node'),
   vue: generator('@unrevealed/vue'),
   js: generator('@unrevealed/js'),
+  serverless: generator('@unrevealed/serverless'),
 };
 
 const configSchema = z.object({
