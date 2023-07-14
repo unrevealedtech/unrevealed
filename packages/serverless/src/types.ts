@@ -2,14 +2,18 @@ export interface UserTraits {}
 
 export interface User {
   id: string;
-  traits: keyof UserTraits extends never ? Record<string, unknown> : UserTraits;
+  traits?: keyof UserTraits extends never
+    ? Record<string, unknown>
+    : UserTraits;
 }
 
 export interface TeamTraits {}
 
 export interface Team {
   id: string;
-  traits: keyof TeamTraits extends never ? Record<string, unknown> : TeamTraits;
+  traits?: keyof TeamTraits extends never
+    ? Record<string, unknown>
+    : TeamTraits;
 }
 
 export interface Features {}
