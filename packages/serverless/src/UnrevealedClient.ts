@@ -6,6 +6,7 @@ import { FeatureAccess, FeatureKey, Team, User } from './types';
 export interface UnrevealedClientOptions {
   apiKey: string;
   fetchMode?: 'lazy' | 'eager';
+  revalidate?: number;
 }
 
 interface DevUnrevealedClientOptions {
@@ -19,6 +20,8 @@ export class UnrevealedClient {
   private trackingApiUrl: string;
   private fetchPromise: Promise<unknown> | undefined;
   private featureAccesses: Map<FeatureKey, FeatureAccess> = new Map();
+  private lastFetchedAt?: number;
+  private revalidateAfterMs: number;
 
   constructor(options: UnrevealedClientOptions) {
     const {
@@ -26,11 +29,13 @@ export class UnrevealedClient {
       edgeApiUrl = EDGE_API_URL,
       trackingApiUrl = TRACKING_API_URL,
       fetchMode = 'lazy',
+      revalidate = 5,
     } = options as UnrevealedClientOptions & DevUnrevealedClientOptions;
 
     this.apiKey = apiKey;
     this.edgeApiUrl = edgeApiUrl;
     this.trackingApiUrl = trackingApiUrl;
+    this.revalidateAfterMs = revalidate * 1000;
 
     if (fetchMode === 'eager') {
       this.fetchRules();
@@ -71,7 +76,14 @@ export class UnrevealedClient {
   }
 
   private async fetchRules() {
-    this.fetchPromise ??= this._fetchRules();
+    const shouldRevalidate =
+      !this.lastFetchedAt ||
+      Date.now() - this.lastFetchedAt > this.revalidateAfterMs;
+
+    if (!this.fetchPromise || shouldRevalidate) {
+      this.fetchPromise = this._fetchRules();
+    }
+
     await this.fetchPromise;
   }
 
@@ -138,6 +150,7 @@ export class UnrevealedClient {
 
   private async _fetchRules() {
     const fetch = getFetch();
+    this.lastFetchedAt = Date.now();
     const response = await fetch(`${this.edgeApiUrl}/rules`, {
       method: 'get',
       headers: { 'Client-Key': this.apiKey },
