@@ -75,6 +75,28 @@ export class UnrevealedClient {
     }
   }
 
+  getFeatureAccess(feature: FeatureKey): FeatureAccess {
+    const featureAccess = this.featureAccesses.get(feature);
+
+    if (!featureAccess) {
+      return {
+        fullAccess: false,
+        userAccess: [],
+        teamAccess: [],
+        userPercentageAccess: 0,
+        teamPercentageAccess: 0,
+      };
+    }
+
+    return {
+      fullAccess: featureAccess.fullAccess,
+      userAccess: [...featureAccess.userAccess],
+      teamAccess: [...featureAccess.teamAccess],
+      userPercentageAccess: featureAccess.userPercentageAccess,
+      teamPercentageAccess: featureAccess.teamPercentageAccess,
+    };
+  }
+
   private async fetchRules() {
     const shouldRevalidate =
       !this.lastFetchedAt ||

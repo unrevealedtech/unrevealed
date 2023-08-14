@@ -1,4 +1,5 @@
 export {
+  FeatureAccess,
   FeatureKey,
   Features,
   Team,
