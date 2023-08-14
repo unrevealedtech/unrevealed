@@ -98,10 +98,10 @@ Returns a `Promise<string[]>` of the feature that are enabled to a user. It also
 #### `getFeatureAccess`
 
 ```ts
-client.getFeatureAccess('feature-key');
+await client.getFeatureAccess('feature-key');
 ```
 
-Returns a `FeatureAccess` object with the current access rules for the given feature:
+Returns a `Promise<FeatureAccess>` that resolves the current access rules for the given feature:
 
 ```ts
 interface FeatureAccess {

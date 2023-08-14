@@ -61,21 +61,9 @@ export class UnrevealedClient {
     );
   }
 
-  async identify({ user, team }: { user?: User; team?: Team }) {
-    if (user) {
-      await this.track('user', { userId: user.id, traits: user.traits });
-    }
+  async getFeatureAccess(feature: FeatureKey): Promise<FeatureAccess> {
+    await this.fetchRules();
 
-    if (team) {
-      await this.track('team', {
-        teamId: team.id,
-        userId: user?.id,
-        traits: team.traits,
-      });
-    }
-  }
-
-  getFeatureAccess(feature: FeatureKey): FeatureAccess {
     const featureAccess = this.featureAccesses.get(feature);
 
     if (!featureAccess) {
@@ -95,6 +83,20 @@ export class UnrevealedClient {
       userPercentageAccess: featureAccess.userPercentageAccess,
       teamPercentageAccess: featureAccess.teamPercentageAccess,
     };
+  }
+
+  async identify({ user, team }: { user?: User; team?: Team }) {
+    if (user) {
+      await this.track('user', { userId: user.id, traits: user.traits });
+    }
+
+    if (team) {
+      await this.track('team', {
+        teamId: team.id,
+        userId: user?.id,
+        traits: team.traits,
+      });
+    }
   }
 
   private async fetchRules() {
