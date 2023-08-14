@@ -29,7 +29,7 @@ const client = new UnrevealedClient({
   apiKey: UNREVEALED_API_KEY,
   logger: customLogger,
   defaults: {
-    'feature-a': true,
+    'feature-key': true,
   },
 });
 ```
@@ -59,7 +59,7 @@ Closes the connection with the Unrevealed API.
 #### `isFeatureEnabled`
 
 ```ts
-client.isFeatureEnabled('feature-b', { user: { id: 'user-id', traits: {...} }, team: { id: 'team-id', traits: {...} } });
+client.isFeatureEnabled('feature-key', { user: { id: 'user-id', traits: {...} }, team: { id: 'team-id', traits: {...} } });
 ```
 
 Returns `true` if a feature is enabled for a certain user in a certain team, `false` otherwise.
@@ -82,6 +82,32 @@ Returns an array of the keys of all the features enabled for a certain user in a
 | -------------- | -------------------------------- | ---------------- |
 | `options.user` | `{ id: string, traits: object }` | An optional user |
 | `options.team` | `{ id: string, traits: object }` | An optional team |
+
+#### `getFeatureAccess`
+
+```ts
+client.getFeatureAccess('feature-key');
+```
+
+Returns a `FeatureAccess` object with the current access rules for the given feature:
+
+```ts
+interface FeatureAccess {
+  fullAccess: boolean;
+  userAccess: string[];
+  teamAccess: string[];
+  userPercentageAccess: number;
+  teamPercentageAccess: number;
+}
+```
+
+- `fullAccess` is `true` if the feature is enabled for every user
+- `userAccess` is a list of user ids who have access to the feature
+- `teamAccess` is a list of team ids who have access to the feature
+- `userPercentageAccess` is a the percentage of users who have access to the feature if relevant
+- `teamPercentageAccess` is a the percentage of teams who have access to the feature if relevant
+
+Percentages are always between `0` and `100` and are `0` if no progressive rollout is in use for the given feature.
 
 #### identify
 

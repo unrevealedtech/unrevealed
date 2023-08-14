@@ -19,3 +19,11 @@ export interface Team {
 export interface Features {}
 
 export type FeatureKey = keyof Features extends never ? string : keyof Features;
+
+export interface FeatureAccess {
+  fullAccess: boolean;
+  userAccess: string[];
+  teamAccess: string[];
+  userPercentageAccess: number;
+  teamPercentageAccess: number;
+}

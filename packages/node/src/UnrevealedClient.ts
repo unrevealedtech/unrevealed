@@ -4,18 +4,10 @@ import { MAX_SHA1 } from './constants';
 import { UnauthorizedException } from './errors';
 import { getFetch } from './fetch';
 import { DefaultLogger, UnrevealedLogger } from './Logger';
-import { FeatureKey, Team, User } from './types';
+import { FeatureAccess, FeatureKey, Team, User } from './types';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
 const TRACKING_API_URL = 'https://track.unrevealed.tech';
-
-interface FeatureAccess {
-  fullAccess: boolean;
-  userAccess: string[];
-  teamAccess: string[];
-  userPercentageAccess: number;
-  teamPercentageAccess: number;
-}
 
 export type ReadyState = 'UNINITIALIZED' | 'CONNECTING' | 'READY' | 'CLOSED';
 
@@ -135,6 +127,28 @@ export class UnrevealedClient {
     return this._featureKeys.filter((featureKey) =>
       this.isFeatureEnabled(featureKey, { user, team }),
     );
+  }
+
+  getFeatureAccess(feature: FeatureKey): FeatureAccess {
+    const featureAccess = this._featureAccesses.get(feature);
+
+    if (!featureAccess) {
+      return {
+        fullAccess: false,
+        userAccess: [],
+        teamAccess: [],
+        userPercentageAccess: 0,
+        teamPercentageAccess: 0,
+      };
+    }
+
+    return {
+      fullAccess: featureAccess.fullAccess,
+      userAccess: [...featureAccess.userAccess],
+      teamAccess: [...featureAccess.teamAccess],
+      userPercentageAccess: featureAccess.userPercentageAccess,
+      teamPercentageAccess: featureAccess.teamPercentageAccess,
+    };
   }
 
   async identify({ user, team }: { user?: User; team?: Team }) {
