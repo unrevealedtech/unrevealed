@@ -235,20 +235,26 @@ export class UnrevealedClient {
         const eventSource = this._createEventSource();
 
         eventSource.addEventListener('error', (event) => {
+          let eventSourceErrorMessage =
+            'message' in event ? event.message : 'Event source error';
+          const status = 'status' in event ? event.status : null;
+          if (status) {
+            eventSourceErrorMessage = `${eventSourceErrorMessage} (status: ${status})`;
+          }
+
           if (this._readyState === 'CONNECTING') {
-            if ('status' in event && event.status === 401) {
+            if (status === 401) {
               reject(new UnauthorizedException());
               return;
             }
-            let errorMessage = 'Could not connect to Unrevealed';
-            if ('message' in event) {
-              errorMessage = `${errorMessage}: ${event.message}`;
-            }
-            reject(errorMessage);
-            return;
-          }
+            const errorMessage = `Could not connect to Unrevealed: ${eventSourceErrorMessage}`;
 
-          this._handleError(event);
+            reject(errorMessage);
+          } else {
+            const errorMessage = `Connection lost: ${eventSourceErrorMessage}`;
+            this._logError(errorMessage);
+            this._handleError(event);
+          }
         });
 
         eventSource.addEventListener('put', async (event) => {
