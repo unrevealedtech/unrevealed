@@ -253,6 +253,7 @@ export class UnrevealedClient {
           } else {
             const errorMessage = `Connection lost: ${eventSourceErrorMessage}`;
             this._logError(errorMessage);
+            console.log({ event });
             this._handleError(event);
           }
         });
