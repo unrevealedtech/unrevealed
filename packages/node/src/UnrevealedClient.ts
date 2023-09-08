@@ -236,7 +236,9 @@ export class UnrevealedClient {
 
         eventSource.addEventListener('error', (event) => {
           let eventSourceErrorMessage =
-            'message' in event ? event.message : 'Event source error';
+            'message' in event && event.message
+              ? event.message
+              : 'Unknown event source error';
           const status = 'status' in event ? event.status : null;
           if (status) {
             eventSourceErrorMessage = `${eventSourceErrorMessage} (status: ${status})`;
@@ -253,7 +255,7 @@ export class UnrevealedClient {
           } else {
             const errorMessage = `Connection lost: ${eventSourceErrorMessage}`;
             this._logError(errorMessage);
-            console.log({ event });
+            console.log(JSON.stringify({ event }));
             this._handleError(event);
           }
         });
