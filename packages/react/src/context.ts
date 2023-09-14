@@ -1,15 +1,15 @@
 import { createContext } from 'react';
 import { TRACKING_URL } from './constants';
-import { Team, User } from './types';
+import { FeatureKey, Team, User } from './types';
 
 export interface UnrevealedContextValue {
   clientKey: string;
-  allFeatures: Set<string>;
-  activeFeatures: Set<string>;
+  allFeatures: Set<FeatureKey>;
+  activeFeatures: Set<FeatureKey>;
   loading: boolean;
   error: string | null;
-  filteredFeatures: Set<string>;
-  setFilteredFeatures: (features: Set<string>) => void;
+  filteredFeatures: Set<FeatureKey>;
+  setFilteredFeatures: React.Dispatch<React.SetStateAction<Set<FeatureKey>>>;
   trackingUrl: string;
   setUser: (user: User | null) => void;
   setTeam: (user: Team | null) => void;
