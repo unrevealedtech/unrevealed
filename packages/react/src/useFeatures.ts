@@ -19,12 +19,12 @@ export function useFeatures(): {
         key: feature,
         enabled: !filteredFeatures.has(feature),
       })),
-    [allFeatureKeys],
+    [allFeatureKeys, filteredFeatures],
   );
 
   const activeFeatures = useMemo(
-    () => [...filteredFeatures],
-    [filteredFeatures],
+    () => allFeatures.filter(({ enabled }) => enabled).map(({ key }) => key),
+    [allFeatures],
   );
 
   const toggleFeature = useCallback(
@@ -37,7 +37,7 @@ export function useFeatures(): {
         setFilteredFeatures((prev) => new Set([...prev, feature]));
       }
     },
-    [setFilteredFeatures],
+    [filteredFeatures, setFilteredFeatures],
   );
 
   return {
