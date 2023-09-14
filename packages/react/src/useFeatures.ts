@@ -12,7 +12,7 @@ export function useFeatures() {
   const allFeatures = useMemo(
     () =>
       [...allFeatureKeys].map((feature) => ({
-        feature,
+        key: feature,
         enabled: filteredFeatures.has(feature),
       })),
     [allFeatureKeys],
