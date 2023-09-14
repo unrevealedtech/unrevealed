@@ -5,7 +5,6 @@ import { FeatureKey } from './types';
 export function useFeatures(): {
   allFeatures: Array<{ key: FeatureKey; enabled: boolean }>;
   activeFeatures: FeatureKey[];
-  setActiveFeatures: (features: FeatureKey[]) => void;
   toggleFeature: (feature: FeatureKey) => void;
 } {
   const {
@@ -18,7 +17,7 @@ export function useFeatures(): {
     () =>
       [...allFeatureKeys].map((feature) => ({
         key: feature,
-        enabled: filteredFeatures.has(feature),
+        enabled: !filteredFeatures.has(feature),
       })),
     [allFeatureKeys],
   );
@@ -26,11 +25,6 @@ export function useFeatures(): {
   const activeFeatures = useMemo(
     () => [...filteredFeatures],
     [filteredFeatures],
-  );
-
-  const setActiveFeatures = useCallback(
-    (features: FeatureKey[]) => setFilteredFeatures(new Set(features)),
-    [setFilteredFeatures],
   );
 
   const toggleFeature = useCallback(
@@ -49,7 +43,6 @@ export function useFeatures(): {
   return {
     allFeatures,
     activeFeatures,
-    setActiveFeatures,
     toggleFeature,
   };
 }
