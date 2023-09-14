@@ -2,14 +2,19 @@ import { useCallback, useContext, useMemo } from 'react';
 import { UnrevealedContext } from './context';
 import { FeatureKey } from './types';
 
-export function useFeatures() {
+export function useFeatures(): {
+  allFeatures: Array<{ key: FeatureKey; enabled: boolean }>;
+  activeFeatures: FeatureKey[];
+  setActiveFeatures: (features: FeatureKey[]) => void;
+  toggleFeature: (feature: FeatureKey) => void;
+} {
   const {
     allFeatures: allFeatureKeys,
     filteredFeatures,
     setFilteredFeatures,
   } = useContext(UnrevealedContext);
 
-  const allFeatures: Array<{ key: FeatureKey; enabled: boolean }> = useMemo(
+  const allFeatures = useMemo(
     () =>
       [...allFeatureKeys].map((feature) => ({
         key: feature,
@@ -18,17 +23,17 @@ export function useFeatures() {
     [allFeatureKeys],
   );
 
-  const activeFeatures: FeatureKey[] = useMemo(
+  const activeFeatures = useMemo(
     () => [...filteredFeatures],
     [filteredFeatures],
   );
 
-  const setActiveFeatures: (features: FeatureKey[]) => void = useCallback(
+  const setActiveFeatures = useCallback(
     (features: FeatureKey[]) => setFilteredFeatures(new Set(features)),
     [setFilteredFeatures],
   );
 
-  const toggleFeature: (feature: FeatureKey) => void = useCallback(
+  const toggleFeature = useCallback(
     (feature: FeatureKey) => {
       if (filteredFeatures.has(feature)) {
         setFilteredFeatures(
