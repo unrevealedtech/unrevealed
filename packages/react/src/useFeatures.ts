@@ -9,7 +9,7 @@ export function useFeatures() {
     setFilteredFeatures,
   } = useContext(UnrevealedContext);
 
-  const allFeatures = useMemo(
+  const allFeatures: Array<{ key: FeatureKey; enabled: boolean }> = useMemo(
     () =>
       [...allFeatureKeys].map((feature) => ({
         key: feature,
@@ -18,17 +18,17 @@ export function useFeatures() {
     [allFeatureKeys],
   );
 
-  const activeFeatures = useMemo(
+  const activeFeatures: FeatureKey[] = useMemo(
     () => [...filteredFeatures],
     [filteredFeatures],
   );
 
-  const setActiveFeatures = useCallback(
+  const setActiveFeatures: (features: FeatureKey[]) => void = useCallback(
     (features: FeatureKey[]) => setFilteredFeatures(new Set(features)),
     [setFilteredFeatures],
   );
 
-  const toggleFeature = useCallback(
+  const toggleFeature: (feature: FeatureKey) => void = useCallback(
     (feature: FeatureKey) => {
       if (filteredFeatures.has(feature)) {
         setFilteredFeatures(
