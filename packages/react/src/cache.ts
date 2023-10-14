@@ -29,7 +29,7 @@ export function setCachedFeatures(
 ) {
   if (cachePolicy === 'localStorage') {
     try {
-      localStorage.set(CACHE_KEY, JSON.stringify(features));
+      localStorage.setItem(CACHE_KEY, JSON.stringify(features));
     } catch (err) {
       return;
     }
