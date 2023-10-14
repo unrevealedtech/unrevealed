@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { CachePolicy, getCachedFeatures, setCachedFeatures } from './cache';
 import { FEATURES_URL } from './constants';
 import { Team, User } from './types';
 import { serializeBody } from './utils';
@@ -7,20 +8,31 @@ interface FetchFeaturesOptions {
   clientKey: string;
   user: User | null;
   team: Team | null;
+  cachePolicy: CachePolicy;
 }
 
 export function useFetchFeatures({
   clientKey,
   user,
   team,
+  cachePolicy,
 }: FetchFeaturesOptions) {
   const [features, setFeatures] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cacheLoaded = useRef(false);
 
   useEffect(() => {
     let isCancelled = false;
     setLoading(true);
+
+    if (!cacheLoaded.current) {
+      const cachedFeatures = getCachedFeatures(cachePolicy);
+      if (cachedFeatures.length > 0) {
+        setFeatures(new Set(cachedFeatures));
+      }
+      cacheLoaded.current = true;
+    }
 
     fetch(FEATURES_URL, {
       method: 'post',
@@ -31,6 +43,7 @@ export function useFetchFeatures({
       .then((data: { features: string[] }) => {
         if (!isCancelled) {
           setFeatures(new Set(data.features));
+          setCachedFeatures(data.features, cachePolicy);
         }
       })
       .catch((err: Error) => {

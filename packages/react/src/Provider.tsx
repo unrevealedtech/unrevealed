@@ -8,6 +8,7 @@ import { useFetchFeatures } from './useFetchFeatures';
 export interface UnrevealedProviderProps {
   clientKey: string;
   children: React.ReactNode;
+  cachePolicy?: 'localStorage' | 'none';
 }
 
 interface AdditionalProps {
@@ -17,6 +18,7 @@ interface AdditionalProps {
 export function UnrevealedProvider({
   clientKey,
   children,
+  cachePolicy = 'none',
   ...props
 }: UnrevealedProviderProps) {
   const { trackingUrl } = props as AdditionalProps;
@@ -35,6 +37,7 @@ export function UnrevealedProvider({
     clientKey,
     user,
     team,
+    cachePolicy,
   });
 
   const activeFeatures = useMemo(() => {
