@@ -1,6 +1,6 @@
 {
   "name": "@unrevealed/js",
-  "version": "0.0.4-rc.1",
+  "version": "0.1.0",
   "description": "Unrevealed SDK for JavaScript",
   "main": "dist/main.js",
   "scripts": {
