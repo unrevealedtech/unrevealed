@@ -1,3 +1,4 @@
+import { CachePolicy, getCachedFeatures, setCachedFeatures } from './cache';
 import { FEATURES_URL, TRACKING_URL } from './constants';
 import { FeatureKey, Team, User } from './types';
 import { serializeBody } from './utils';
@@ -6,14 +7,26 @@ type OnChange = (errorfeatures: FeatureKey[]) => void;
 type OnError = (error: unknown) => void;
 type Subscription = symbol;
 
+interface UnrevealedClientOptions {
+  cachePolicy?: CachePolicy;
+}
+
 export class UnrevealedClient {
   private features: Set<FeatureKey> = new Set();
   private isLoading = false;
   private lastFetchPromise: Promise<Response> | null = null;
   private changeSubscriptions: Map<Subscription, OnChange> = new Map();
   private errorSubscriptions: Map<Subscription, OnError> = new Map();
+  private cachePolicy: CachePolicy;
 
-  constructor(private clientKey: string) {}
+  constructor(
+    private clientKey: string,
+    { cachePolicy = 'none' }: UnrevealedClientOptions = {},
+  ) {
+    this.cachePolicy = cachePolicy;
+
+    this.features = new Set(getCachedFeatures(cachePolicy));
+  }
 
   async identify({ user, team }: { user: User | null; team?: Team | null }) {
     if (user) {
@@ -48,8 +61,7 @@ export class UnrevealedClient {
       }
 
       const data: { features: FeatureKey[] } = await response.json();
-      this.features = new Set(data.features);
-      this.broadcastChange(this.features);
+      this.setFeatures(data.features);
     } catch (err) {
       this.broadcastError(err);
     } finally {
@@ -82,6 +94,12 @@ export class UnrevealedClient {
   unsubscribe(subscription: Subscription) {
     this.changeSubscriptions.delete(subscription);
     this.errorSubscriptions.delete(subscription);
+  }
+
+  private setFeatures(features: FeatureKey[]) {
+    this.features = new Set(features);
+    setCachedFeatures(features, this.cachePolicy);
+    this.broadcastChange(this.features);
   }
 
   private broadcastChange(features: Set<FeatureKey>) {
