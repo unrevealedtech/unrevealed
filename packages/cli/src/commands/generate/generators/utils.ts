@@ -67,6 +67,8 @@ export function generateFeatures(features: Query['product']['features']) {
 ${features
   .map(
     (feature) => `  ${formatObjectKey(feature.key)}: {
+    id: ${JSON.stringify(feature.id)},
+    key: ${JSON.stringify(feature.key)},
     name: ${JSON.stringify(feature.name)},
     description: ${JSON.stringify(feature.description)},
   },`,
