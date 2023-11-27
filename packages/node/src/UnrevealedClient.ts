@@ -1,10 +1,16 @@
 import crypto from 'crypto';
 import EventSource from 'eventsource';
+import { DefaultLogger, UnrevealedLogger } from './Logger';
 import { MAX_SHA1 } from './constants';
 import { UnauthorizedException } from './errors';
 import { getFetch } from './fetch';
-import { DefaultLogger, UnrevealedLogger } from './Logger';
-import { FeatureAccess, FeatureKey, Team, User } from './types';
+import {
+  FeatureAccess,
+  FeatureAccessUpdate,
+  FeatureKey,
+  Team,
+  User,
+} from './types';
 
 const SSE_API_URL = 'https://sse.unrevealed.tech';
 const TRACKING_API_URL = 'https://track.unrevealed.tech';
@@ -165,6 +171,38 @@ export class UnrevealedClient {
     }
   }
 
+  async updateFeatureAccess(
+    featureKey: FeatureKey,
+    access: FeatureAccessUpdate,
+  ): Promise<FeatureAccess> {
+    const fetch = getFetch();
+
+    try {
+      const response = await fetch(
+        `${this._apiUrl}/api/update-feature-access`,
+        {
+          method: 'post',
+          headers: {
+            Authorization: `Bearer ${this._apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ key: featureKey, access }),
+        },
+      );
+      const featureAccess = await response.json();
+
+      this._featureAccesses.set(featureKey, featureAccess);
+
+      return featureAccess;
+    } catch (err) {
+      let message = 'Error updating feature access';
+      if (err instanceof Error) {
+        message = `${message}: ${err.message}`;
+      }
+      throw new Error(message);
+    }
+  }
+
   private _normalizeKey(key: string) {
     const hash = crypto.createHash('sha1');
     hash.update(key);
@@ -255,7 +293,6 @@ export class UnrevealedClient {
           } else {
             const errorMessage = `Connection lost: ${eventSourceErrorMessage}`;
             this._logError(errorMessage);
-            console.log(JSON.stringify({ event }));
             this._handleError(event);
           }
         });

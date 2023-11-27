@@ -27,3 +27,17 @@ export interface FeatureAccess {
   userPercentageAccess: number;
   teamPercentageAccess: number;
 }
+
+class ListUpdates {
+  add?: string[];
+  remove?: string[];
+}
+
+export class FeatureAccessUpdate {
+  fullAccess?: boolean;
+  users?: ListUpdates;
+  teams?: ListUpdates;
+  collections?: ListUpdates;
+  userPercentage?: number;
+  teamPercentage?: number;
+}
