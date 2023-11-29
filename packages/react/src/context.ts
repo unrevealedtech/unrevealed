@@ -13,6 +13,7 @@ export interface UnrevealedContextValue {
   trackingUrl: string;
   setUser: (user: User | null) => void;
   setTeam: (user: Team | null) => void;
+  defaults: Partial<Record<FeatureKey, boolean>>;
 }
 
 export const UnrevealedContext = createContext<UnrevealedContextValue>({
@@ -26,4 +27,5 @@ export const UnrevealedContext = createContext<UnrevealedContextValue>({
   trackingUrl: TRACKING_URL,
   setUser: () => {},
   setTeam: () => {},
+  defaults: {},
 });

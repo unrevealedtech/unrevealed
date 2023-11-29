@@ -2,13 +2,14 @@ import React, { useMemo, useState } from 'react';
 
 import { TRACKING_URL } from './constants';
 import { UnrevealedContext } from './context';
-import { Team, User } from './types';
+import { FeatureKey, Team, User } from './types';
 import { useFetchFeatures } from './useFetchFeatures';
 
 export interface UnrevealedProviderProps {
   clientKey: string;
   children: React.ReactNode;
   cachePolicy?: 'localStorage' | 'none';
+  defaults?: Partial<Record<FeatureKey, boolean>>;
 }
 
 interface AdditionalProps {
@@ -19,6 +20,7 @@ export function UnrevealedProvider({
   clientKey,
   children,
   cachePolicy = 'none',
+  defaults = {},
   ...props
 }: UnrevealedProviderProps) {
   const { trackingUrl } = props as AdditionalProps;
@@ -62,6 +64,7 @@ export function UnrevealedProvider({
         trackingUrl: trackingUrl || TRACKING_URL,
         setUser,
         setTeam,
+        defaults,
       }}
     >
       {children}

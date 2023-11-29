@@ -9,11 +9,18 @@ export interface UseFeatureResult {
 }
 
 export function useFeature(featureKey: FeatureKey) {
-  const { error, loading, activeFeatures } = useContext(UnrevealedContext);
+  const { error, loading, activeFeatures, defaults } =
+    useContext(UnrevealedContext);
+
+  const enabled = loading
+    ? defaults[featureKey] ?? false
+    : activeFeatures.has(featureKey);
+
+  const isFeatureLoading = loading && defaults[featureKey] !== undefined;
 
   return {
-    enabled: activeFeatures.has(featureKey),
-    loading,
+    loading: isFeatureLoading,
+    enabled,
     error,
   };
 }
