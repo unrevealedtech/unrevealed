@@ -22,7 +22,7 @@ const RETRY_INTERVAL_MS = 2000;
 export interface UnrevealedClientOptions {
   apiKey: string;
   logger?: UnrevealedLogger;
-  defaults?: Record<string, boolean>;
+  defaults?: Partial<Record<FeatureKey, boolean>>;
 }
 
 /** Options used in dev and not exposed in the public API */
@@ -56,7 +56,7 @@ export class UnrevealedClient {
     const defaultsEntries = defaults
       ? Object.keys(defaults).map(
           (featureKey) =>
-            [featureKey as FeatureKey, defaults[featureKey]] as const,
+            [featureKey as FeatureKey, defaults[featureKey] ?? false] as const,
         )
       : [];
     this._defaults = new Map(defaultsEntries);
