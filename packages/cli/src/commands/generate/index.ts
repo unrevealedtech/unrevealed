@@ -9,9 +9,8 @@ import { readToken } from '~/auth';
 import { logError, logSuccess, logUnauthorized } from '~/logger';
 import { generator } from './generators/generator';
 
-import { fetchProduct, Query } from './graphql';
-
-type Sdk = 'react' | 'node' | 'vue' | 'js' | 'serverless';
+import { fetchProduct } from './graphql';
+import { SDKS } from './types';
 
 export async function generate() {
   const token = await readToken();
@@ -48,8 +47,7 @@ export async function generate() {
   const generateItems = Object.entries(generates);
 
   for (const [filename, { sdk }] of generateItems) {
-    const generate = generators[sdk];
-
+    const generate = generator(SDKS[sdk]);
     const code = generate(product);
 
     try {
@@ -66,14 +64,6 @@ export async function generate() {
     }
   }
 }
-
-const generators: Record<Sdk, (product: Query['product']) => string> = {
-  react: generator('@unrevealed/react'),
-  node: generator('@unrevealed/node'),
-  vue: generator('@unrevealed/vue'),
-  js: generator('@unrevealed/js'),
-  serverless: generator('@unrevealed/serverless'),
-};
 
 const configSchema = z.object({
   productId: z.string(),

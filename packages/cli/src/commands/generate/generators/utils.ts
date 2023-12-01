@@ -25,6 +25,14 @@ ${features
 }`;
 }
 
+export function generateUnrevealedStagesInterface(
+  stages: Query['product']['featureStages'],
+) {
+  return `interface Stages {
+${stages.map((stage) => `  ${formatObjectKey(stage.key)}: boolean;`).join(`\n`)}
+}`;
+}
+
 export function generateUserTraitsInterface(
   traits: Query['product']['userTraits'],
 ) {
@@ -82,5 +90,33 @@ ${features
 export function generateFeatureKeys(features: Query['product']['features']) {
   return `export const featureKeys: FeatureKey[] = [
 ${features.map((feature) => `  '${feature.key}',`).join('\n')}
+];`;
+}
+
+export function generateStageInterface() {
+  return `export interface Stage {
+  id: string;
+  key: string;
+  name: string;
+}`;
+}
+
+export function generateStages(stages: Query['product']['featureStages']) {
+  return `export const stages: Record<StageKey, Stage> = {
+${stages
+  .map(
+    (stage) => `  ${formatObjectKey(stage.key)}: {
+    id: ${JSON.stringify(stage.id)},
+    key: ${JSON.stringify(stage.key)},
+    name: ${JSON.stringify(stage.name)},
+  },`,
+  )
+  .join('\n')}
+};`;
+}
+
+export function generateStageKeys(stages: Query['product']['featureStages']) {
+  return `export const stageKeys: StageKey[] = [
+${stages.map((stage) => `  '${stage.key}',`).join('\n')}
 ];`;
 }

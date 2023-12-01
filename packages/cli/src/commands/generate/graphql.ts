@@ -13,6 +13,12 @@ const QUERY = gql`
         name
         description
       }
+      featureStages {
+        id
+        name
+        key
+        position
+      }
       userTraits {
         name
         dataType
@@ -33,6 +39,12 @@ export type Query = {
       key: string;
       name: string;
       description: string;
+    }>;
+    featureStages: Array<{
+      id: string;
+      name: string;
+      key: string;
+      position: number;
     }>;
     userTraits: Array<{
       name: string;
