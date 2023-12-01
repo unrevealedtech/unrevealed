@@ -31,6 +31,7 @@ export function UnrevealedProvider({
   const [user, setUser] = useState<User | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
 
+  const [fetchIndex, setFetchIndex] = useState(0);
   const {
     features: allFeatures,
     loading,
@@ -40,6 +41,7 @@ export function UnrevealedProvider({
     user,
     team,
     cachePolicy,
+    fetchIndex,
   });
 
   const activeFeatures = useMemo(() => {
@@ -65,6 +67,8 @@ export function UnrevealedProvider({
         setUser,
         setTeam,
         defaults,
+        fetchIndex,
+        setFetchIndex,
       }}
     >
       {children}

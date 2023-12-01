@@ -14,6 +14,8 @@ export interface UnrevealedContextValue {
   setUser: (user: User | null) => void;
   setTeam: (user: Team | null) => void;
   defaults: Partial<Record<FeatureKey, boolean>>;
+  fetchIndex: number;
+  setFetchIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const UnrevealedContext = createContext<UnrevealedContextValue>({
@@ -28,4 +30,6 @@ export const UnrevealedContext = createContext<UnrevealedContextValue>({
   setUser: () => {},
   setTeam: () => {},
   defaults: {},
+  fetchIndex: 0,
+  setFetchIndex: () => {},
 });

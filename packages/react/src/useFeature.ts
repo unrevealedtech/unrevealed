@@ -12,9 +12,9 @@ export function useFeature(featureKey: FeatureKey) {
   const { error, loading, activeFeatures, defaults } =
     useContext(UnrevealedContext);
 
-  const enabled = loading
-    ? defaults[featureKey] ?? false
-    : activeFeatures.has(featureKey);
+  const enabled =
+    activeFeatures.has(featureKey) ||
+    (loading && defaults[featureKey] === true);
 
   const isFeatureLoading = loading && defaults[featureKey] !== undefined;
 

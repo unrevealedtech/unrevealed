@@ -9,6 +9,7 @@ interface FetchFeaturesOptions {
   user: User | null;
   team: Team | null;
   cachePolicy: CachePolicy;
+  fetchIndex?: number;
 }
 
 export function useFetchFeatures({
@@ -16,6 +17,7 @@ export function useFetchFeatures({
   user,
   team,
   cachePolicy,
+  fetchIndex = 0,
 }: FetchFeaturesOptions) {
   const [features, setFeatures] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,7 @@ export function useFetchFeatures({
     return () => {
       isCancelled = true;
     };
-  }, [user, team, clientKey]);
+  }, [user, team, clientKey, fetchIndex]);
 
   return {
     loading,
