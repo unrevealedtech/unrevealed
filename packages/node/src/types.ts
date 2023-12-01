@@ -20,6 +20,10 @@ export interface Features {}
 
 export type FeatureKey = keyof Features extends never ? string : keyof Features;
 
+export interface Stages {}
+
+export type StageKey = keyof Stages extends never ? string : keyof Stages;
+
 export interface FeatureAccess {
   fullAccess: boolean;
   userAccess: string[];

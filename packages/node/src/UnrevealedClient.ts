@@ -8,6 +8,7 @@ import {
   FeatureAccess,
   FeatureAccessUpdate,
   FeatureKey,
+  StageKey,
   Team,
   User,
 } from './types';
@@ -174,6 +175,38 @@ export class UnrevealedClient {
   async updateFeatureAccess(
     featureKey: FeatureKey,
     access: FeatureAccessUpdate,
+  ): Promise<FeatureAccess> {
+    const fetch = getFetch();
+
+    try {
+      const response = await fetch(
+        `${this._apiUrl}/api/update-feature-access`,
+        {
+          method: 'post',
+          headers: {
+            Authorization: `Bearer ${this._apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ key: featureKey, access }),
+        },
+      );
+      const featureAccess = await response.json();
+
+      this._featureAccesses.set(featureKey, featureAccess);
+
+      return featureAccess;
+    } catch (err) {
+      let message = 'Error updating feature access';
+      if (err instanceof Error) {
+        message = `${message}: ${err.message}`;
+      }
+      throw new Error(message);
+    }
+  }
+
+  async updateFeatureStage(
+    featureKey: FeatureKey,
+    access: StageKey,
   ): Promise<FeatureAccess> {
     const fetch = getFetch();
 
