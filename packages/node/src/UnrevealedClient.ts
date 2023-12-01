@@ -206,29 +206,26 @@ export class UnrevealedClient {
 
   async updateFeatureStage(
     featureKey: FeatureKey,
-    access: StageKey,
+    stageKey: StageKey,
   ): Promise<FeatureAccess> {
     const fetch = getFetch();
 
     try {
-      const response = await fetch(
-        `${this._apiUrl}/api/update-feature-access`,
-        {
-          method: 'post',
-          headers: {
-            Authorization: `Bearer ${this._apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ key: featureKey, access }),
+      const response = await fetch(`${this._apiUrl}/api/update-feature-stage`, {
+        method: 'post',
+        headers: {
+          Authorization: `Bearer ${this._apiKey}`,
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({ featureKey, stageKey }),
+      });
       const featureAccess = await response.json();
 
       this._featureAccesses.set(featureKey, featureAccess);
 
       return featureAccess;
     } catch (err) {
-      let message = 'Error updating feature access';
+      let message = 'Error updating feature stage';
       if (err instanceof Error) {
         message = `${message}: ${err.message}`;
       }
